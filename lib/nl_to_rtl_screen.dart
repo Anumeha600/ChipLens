@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import 'ai_repair_screen.dart';
+import 'backend/coverage/coverage_report.dart';
+import 'backend/diagnostics/diagnostic.dart';
+import 'backend/diagnostics/icarus_parser.dart';
+import 'backend/tools/icarus_service.dart';
+import 'backend/tools/rtl_testbench_generator.dart';
 import 'models/design_spec.dart';
 import 'services/nl_pipeline/pipeline.dart';
 import 'theme/app_theme.dart';
@@ -84,7 +90,7 @@ class _NlToRtlScreenState extends State<NlToRtlScreen>
     try {
       final result = await pipelineFuture;
       if (!mounted) return;
-      final tc = TabController(length: 6, vsync: this);
+      final tc = TabController(length: 7, vsync: this);
       setState(() {
         _isGenerating = false;
         _result = result;
@@ -515,6 +521,7 @@ class _NlToRtlScreenState extends State<NlToRtlScreen>
       (Icons.science_rounded,      'Testbench'),
       (Icons.lightbulb_rounded,    'Explanation'),
       (Icons.analytics_rounded,    'Quality'),
+      (Icons.bar_chart_rounded,    'Coverage'),
     ];
 
     return Padding(
@@ -543,6 +550,10 @@ class _NlToRtlScreenState extends State<NlToRtlScreen>
                     )),
               ),
               _GradeBadge(r.quality.grade, r.quality.total),
+              if (r.quality.warningCount > 0) ...[
+                const SizedBox(width: 8),
+                _AiRepairButton(result: r),
+              ],
             ],
           ),
           const SizedBox(height: 16),
@@ -603,9 +614,10 @@ class _NlToRtlScreenState extends State<NlToRtlScreen>
                   isDark: isDark,
                 ),
                 _CodeTab(code: r.rtl, language: 'Verilog'),
-                _TestbenchTab(code: r.testbench, spec: r.spec),
+                _TestbenchTab(code: r.testbench, spec: r.spec, rtl: r.rtl),
                 _ExplanationTab(markdown: r.explanation),
                 _QualityTab(quality: r.quality),
+                _CoverageTab(report: r.coverageReport),
               ],
             ),
           ),
@@ -818,6 +830,46 @@ class _GradeBadge extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: c.withValues(alpha: 0.7))),
         ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AI Repair navigation button
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _AiRepairButton extends StatelessWidget {
+  final DesignResult result;
+  const _AiRepairButton({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => AiRepairScreen(originalResult: result),
+      )),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          gradient: AppGradients.primary,
+          borderRadius: BorderRadius.circular(9),
+          boxShadow: AppShadows.glow(AppColors.primary),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.auto_fix_high_rounded, color: Colors.white, size: 13),
+            SizedBox(width: 5),
+            Text('AI Repair',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.1,
+                )),
+          ],
+        ),
       ),
     );
   }
@@ -1645,16 +1697,70 @@ class _SyntaxHighlight extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TAB 4 (Testbench) — Verification summary + raw code
+// TAB 4 (Testbench) — Verification summary + raw code + "Generate Testbench"
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class _TestbenchTab extends StatelessWidget {
+class _TestbenchTab extends StatefulWidget {
   final String code;
   final DesignSpecification spec;
-  const _TestbenchTab({required this.code, required this.spec});
+  final String rtl;
+  const _TestbenchTab({required this.code, required this.spec, required this.rtl});
 
-  // Build a short, spec-derived list of what the testbench exercises.
+  @override
+  State<_TestbenchTab> createState() => _TestbenchTabState();
+}
+
+class _TestbenchTabState extends State<_TestbenchTab> {
+  // ── Simulation state ───────────────────────────────────────────────────────
+  bool _isRunning = false;
+  TestbenchResult? _tbResult;
+  SimulationResult? _simResult;
+  List<Diagnostic> _simDiags = [];
+  String? _genError;
+
+  // ── Generate testbench → compile → simulate ───────────────────────────────
+
+  Future<void> _generateAndSimulate() async {
+    setState(() {
+      _isRunning = true;
+      _genError  = null;
+      _tbResult  = null;
+      _simResult = null;
+      _simDiags  = [];
+    });
+
+    try {
+      final tbResult = RtlTestbenchGenerator.generate(widget.rtl);
+      if (!mounted) return;
+      setState(() => _tbResult = tbResult);
+
+      if (!tbResult.success) {
+        setState(() { _isRunning = false; _genError = tbResult.error; });
+        return;
+      }
+
+      const svc = IcarusService();
+      final simResult = await svc.simulate(widget.rtl, tbResult.source);
+      if (!mounted) return;
+
+      final combined = '${simResult.stdout}\n${simResult.stderr}';
+      final diags    = IcarusParser.parse(combined);
+
+      setState(() {
+        _simResult = simResult;
+        _simDiags  = diags;
+        _isRunning = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _isRunning = false; _genError = e.toString(); });
+    }
+  }
+
+  // ── Scenarios ─────────────────────────────────────────────────────────────
+
   List<_TestScenario> _scenarios() {
+    final spec = widget.spec;
     switch (spec.designType) {
       case 'vending_machine':
         return [
@@ -1718,80 +1824,307 @@ class _TestbenchTab extends StatelessWidget {
     }
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final scenarios = _scenarios();
     final isDark    = context.isDark;
+    final showCode  = _tbResult?.success == true ? _tbResult!.source : widget.code;
 
-    return Column(
-      children: [
-        // ── Verification summary card ──────────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.teal.withValues(alpha: 0.06),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-            border: Border.all(color: AppColors.teal.withValues(alpha: 0.2)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.science_rounded, size: 14, color: AppColors.teal),
-                  const SizedBox(width: 6),
-                  Text('VERIFICATION PLAN',
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.teal,
-                        letterSpacing: 0.8,
-                      )),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
-                    ),
-                    child: Text('${scenarios.length} scenarios',
-                        style: const TextStyle(
-                            fontSize: 10.5, fontWeight: FontWeight.w600,
-                            color: AppColors.success)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              ...scenarios.map((s) => Padding(
-                padding: const EdgeInsets.only(bottom: 7),
-                child: Row(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Verification summary card ────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.teal.withValues(alpha: 0.06),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+              border: Border.all(color: AppColors.teal.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Icon(s.icon, size: 13, color: AppColors.teal),
-                    const SizedBox(width: 8),
-                    Text(s.name,
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600,
-                            color: context.textPrimary)),
+                    Icon(Icons.science_rounded, size: 14, color: AppColors.teal),
                     const SizedBox(width: 6),
-                    Expanded(
-                      child: Text('— ${s.description}',
-                          style: TextStyle(
-                              fontSize: 11.5, color: context.textSecondary),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                    Text('VERIFICATION PLAN',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.teal,
+                          letterSpacing: 0.8,
+                        )),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                      ),
+                      child: Text('${scenarios.length} scenarios',
+                          style: const TextStyle(
+                              fontSize: 10.5, fontWeight: FontWeight.w600,
+                              color: AppColors.success)),
+                    ),
+                    const SizedBox(width: 8),
+                    // ── Generate Testbench button ─────────────────────
+                    GestureDetector(
+                      onTap: _isRunning ? null : _generateAndSimulate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: _isRunning ? 0.05 : 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isRunning)
+                              const SizedBox(
+                                width: 10, height: 10,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 1.5, color: AppColors.primary),
+                              )
+                            else
+                              const Icon(Icons.play_arrow_rounded,
+                                  size: 12, color: AppColors.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              _isRunning ? 'Running…' : 'Generate Testbench',
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              )),
+                const SizedBox(height: 10),
+                ...scenarios.map((s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 7),
+                  child: Row(
+                    children: [
+                      Icon(s.icon, size: 13, color: AppColors.teal),
+                      const SizedBox(width: 8),
+                      Text(s.name,
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w600,
+                              color: context.textPrimary)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text('— ${s.description}',
+                            style: TextStyle(
+                                fontSize: 11.5, color: context.textSecondary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+
+          // ── Simulation results ───────────────────────────────────────
+          if (_genError != null) ...[
+            const SizedBox(height: 8),
+            _SimErrorCard(message: _genError!),
+          ] else if (_simResult != null) ...[
+            const SizedBox(height: 8),
+            _SimResultCard(
+              simResult: _simResult!,
+              diags:     _simDiags,
+            ),
+          ],
+
+          // ── Testbench code ───────────────────────────────────────────
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 360,
+            child: _CodeTabContent(
+              code: showCode, language: 'Testbench', isDark: isDark),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Simulation result display widgets ─────────────────────────────────────────
+
+class _SimErrorCard extends StatelessWidget {
+  final String message;
+  const _SimErrorCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline_rounded, size: 14, color: AppColors.error),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(message,
+                style: TextStyle(fontSize: 12, color: AppColors.error, height: 1.4)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SimResultCard extends StatelessWidget {
+  final SimulationResult simResult;
+  final List<Diagnostic> diags;
+  const _SimResultCard({required this.simResult, required this.diags});
+
+  @override
+  Widget build(BuildContext context) {
+    final sim = simResult;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: context.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status row
+          Row(
+            children: [
+              _SimStatusChip(label: 'Compile', ok: sim.compileSuccess),
+              if (sim.compileSuccess) ...[
+                const SizedBox(width: 8),
+                _SimStatusChip(label: 'Simulate', ok: sim.simulationSuccess),
+              ],
             ],
           ),
-        ),
-        // ── Testbench code ─────────────────────────────────────────────
-        Expanded(
-          child: _CodeTabContent(code: code, language: 'Testbench', isDark: isDark),
-        ),
-      ],
+
+          // Diagnostics
+          if (diags.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text('DIAGNOSTICS',
+                style: TextStyle(
+                    fontSize: 9.5, fontWeight: FontWeight.w700,
+                    color: context.textSecondary, letterSpacing: 0.7)),
+            const SizedBox(height: 6),
+            ...diags.map((d) => _DiagRow(diag: d)),
+          ],
+
+          // Simulation output
+          if (sim.stdout.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text('OUTPUT',
+                style: TextStyle(
+                    fontSize: 9.5, fontWeight: FontWeight.w700,
+                    color: context.textSecondary, letterSpacing: 0.7)),
+            const SizedBox(height: 4),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.isDark
+                    ? const Color(0xFF0D0F17)
+                    : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: context.border),
+              ),
+              child: Text(
+                sim.stdout.trim(),
+                style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    color: context.textPrimary,
+                    height: 1.5),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SimStatusChip extends StatelessWidget {
+  final String label;
+  final bool ok;
+  const _SimStatusChip({required this.label, required this.ok});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ok ? AppColors.success : AppColors.error;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(ok ? Icons.check_circle_outline_rounded : Icons.cancel_outlined,
+              size: 11, color: color),
+          const SizedBox(width: 4),
+          Text('$label ${ok ? "✓" : "✗"}',
+              style: TextStyle(
+                  fontSize: 10.5, fontWeight: FontWeight.w600, color: color)),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiagRow extends StatelessWidget {
+  final Diagnostic diag;
+  const _DiagRow({required this.diag});
+
+  @override
+  Widget build(BuildContext context) {
+    final isError = diag.severity == 'error';
+    final color   = isError ? AppColors.error : AppColors.warning;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(isError ? Icons.error_outline_rounded : Icons.warning_amber_rounded,
+              size: 13, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(diag.title,
+                    style: TextStyle(
+                        fontSize: 11.5, fontWeight: FontWeight.w600, color: color)),
+                Text(diag.description,
+                    style: TextStyle(
+                        fontSize: 11, color: context.textSecondary, height: 1.4)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2653,4 +2986,470 @@ class _NlFsmPainter extends CustomPainter {
       old.edges         != edges         ||
       old.selectedState != selectedState ||
       old.isDark        != isDark;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Coverage Dashboard tab
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _CoverageTab extends StatefulWidget {
+  final CoverageReport? report;
+  const _CoverageTab({required this.report});
+
+  @override
+  State<_CoverageTab> createState() => _CoverageTabState();
+}
+
+class _CoverageTabState extends State<_CoverageTab> {
+  @override
+  Widget build(BuildContext context) {
+    final report = widget.report;
+
+    if (report == null) {
+      return _buildEmpty(context);
+    }
+
+    final r = report.result;
+    final m = report.metrics;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Overall grade banner ────────────────────────────────────────
+          _buildGradeBanner(context, report),
+          const SizedBox(height: 16),
+
+          // ── Metric progress bars ────────────────────────────────────────
+          _buildSectionHeader(context, Icons.speed_rounded, 'Coverage Metrics'),
+          const SizedBox(height: 10),
+          _CoverageBar(label: 'State',      value: r.stateCoverage,      covered: m.visitedStateCount,       total: m.totalStates),
+          _CoverageBar(label: 'Transition', value: r.transitionCoverage, covered: m.executedTransitionCount, total: m.totalTransitions),
+          _CoverageBar(label: 'Branch',     value: r.branchCoverage,     covered: m.coveredBranchCount,      total: m.totalBranches),
+          _CoverageBar(label: 'Toggle',     value: r.toggleCoverage,     covered: m.toggledSignalCount,      total: m.totalSignals),
+          _CoverageBar(label: 'Condition',  value: r.conditionCoverage,  covered: m.evaluatedConditionCount, total: m.totalConditions),
+          _CoverageBar(label: 'Line',       value: r.lineCoverage,       covered: m.executedLineCount,       total: m.totalLines),
+          const SizedBox(height: 20),
+
+          // ── Gap lists ───────────────────────────────────────────────────
+          if (r.unvisitedStates.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.circle_outlined, 'Unvisited States'),
+            const SizedBox(height: 8),
+            _GapList(items: r.unvisitedStates, color: AppColors.warning),
+            const SizedBox(height: 16),
+          ],
+          if (r.untakenTransitions.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.arrow_forward_rounded, 'Missing Transitions'),
+            const SizedBox(height: 8),
+            _GapList(items: r.untakenTransitions, color: AppColors.orange),
+            const SizedBox(height: 16),
+          ],
+          if (r.untoggledSignals.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.toggle_off_rounded, 'Untoggled Signals'),
+            const SizedBox(height: 8),
+            _GapList(items: r.untoggledSignals, color: AppColors.info),
+            const SizedBox(height: 16),
+          ],
+          if (r.uncoveredBranches.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.call_split_rounded, 'Uncovered Branches'),
+            const SizedBox(height: 8),
+            _GapList(items: r.uncoveredBranches, color: AppColors.teal),
+            const SizedBox(height: 16),
+          ],
+          if (r.uncoveredConditions.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.rule_rounded, 'Partial Conditions'),
+            const SizedBox(height: 8),
+            _GapList(items: r.uncoveredConditions, color: AppColors.primary),
+            const SizedBox(height: 16),
+          ],
+
+          // ── Heatmap ─────────────────────────────────────────────────────
+          if (report.heatMap.stateHeat.isNotEmpty) ...[
+            _buildSectionHeader(context, Icons.grid_view_rounded, 'State Heat Map'),
+            const SizedBox(height: 10),
+            _StateHeatMap(heatData: report.heatMap.stateHeat),
+            const SizedBox(height: 16),
+          ],
+
+          // ── Export ──────────────────────────────────────────────────────
+          _buildSectionHeader(context, Icons.download_rounded, 'Export Report'),
+          const SizedBox(height: 10),
+          _ExportBar(report: report),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmpty(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.bar_chart_rounded, size: 48,
+              color: context.textSecondary.withValues(alpha: 0.4)),
+          const SizedBox(height: 16),
+          Text('No Coverage Data',
+              style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w700,
+                color: context.textPrimary)),
+          const SizedBox(height: 8),
+          Text('Simulation did not produce coverage data.\nVerify Icarus Verilog is installed.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: context.textSecondary, height: 1.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradeBanner(BuildContext context, CoverageReport report) {
+    final color = _coverageColor(report.overallCoverage);
+    final pct   = (report.overallCoverage * 100).toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52, height: 52,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
+            ),
+            child: Center(
+              child: Text('$pct%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                  )),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(report.grade,
+                    style: TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w800, color: color)),
+                const SizedBox(height: 4),
+                Text('${report.totalGaps} gap${report.totalGaps != 1 ? "s" : ""} · '
+                    '${report.coverageWarnings.length} warning${report.coverageWarnings.length != 1 ? "s" : ""}',
+                    style: TextStyle(fontSize: 12.5, color: context.textSecondary)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, IconData icon, String label) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: context.textSecondary),
+        const SizedBox(width: 6),
+        Text(label,
+            style: TextStyle(
+              fontSize: 12.5, fontWeight: FontWeight.w700,
+              color: context.textSecondary, letterSpacing: 0.3)),
+      ],
+    );
+  }
+
+  static Color _coverageColor(double v) {
+    if (v >= 0.95) return AppColors.success;
+    if (v >= 0.80) return AppColors.teal;
+    if (v >= 0.60) return AppColors.warning;
+    if (v >= 0.40) return AppColors.orange;
+    return AppColors.error;
+  }
+}
+
+// ─── Coverage progress bar ────────────────────────────────────────────────────
+
+class _CoverageBar extends StatelessWidget {
+  final String label;
+  final double value;
+  final int covered;
+  final int total;
+
+  const _CoverageBar({
+    required this.label,
+    required this.value,
+    required this.covered,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct   = (value * 100).toStringAsFixed(1);
+    final color = _colorFor(value);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 76,
+                child: Text(label,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: context.textPrimary,
+                    )),
+              ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: value.clamp(0.0, 1.0),
+                    minHeight: 8,
+                    backgroundColor: context.border,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 48,
+                child: Text('$pct%',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    )),
+              ),
+              const SizedBox(width: 8),
+              Text('$covered/$total',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.textSecondary,
+                  )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Color _colorFor(double v) {
+    if (v >= 0.80) return AppColors.success;
+    if (v >= 0.60) return AppColors.teal;
+    if (v >= 0.40) return AppColors.warning;
+    return AppColors.error;
+  }
+}
+
+// ─── Gap list ─────────────────────────────────────────────────────────────────
+
+class _GapList extends StatelessWidget {
+  final List<String> items;
+  final Color color;
+  const _GapList({required this.items, required this.color});
+
+  List<Widget> _buildRows(BuildContext context) {
+    final visible = items.take(12).toList();
+    final rows    = <Widget>[];
+    for (var i = 0; i < visible.length; i++) {
+      rows.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        child: Row(
+          children: [
+            Container(
+              width: 6, height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(visible[i],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: context.textPrimary,
+                  )),
+            ),
+          ],
+        ),
+      ));
+      if (i < visible.length - 1 || items.length > 12) {
+        rows.add(Container(height: 1, color: context.border));
+      }
+    }
+    if (items.length > 12) {
+      rows.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        child: Text('… and ${items.length - 12} more',
+            style: TextStyle(
+              fontSize: 11.5,
+              color: context.textSecondary,
+              fontStyle: FontStyle.italic,
+            )),
+      ));
+    }
+    return rows;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: context.border),
+      ),
+      child: Column(
+        children: _buildRows(context),
+      ),
+    );
+  }
+}
+
+// ─── State heat map ───────────────────────────────────────────────────────────
+
+class _StateHeatMap extends StatelessWidget {
+  final Map<String, double> heatData;
+  const _StateHeatMap({required this.heatData});
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = heatData.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: entries.map((e) {
+        final heat  = e.value.clamp(0.0, 1.0);
+        final color = Color.lerp(AppColors.error, AppColors.success, heat)!;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8, height: 8,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+              Text(e.key,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  )),
+              const SizedBox(width: 4),
+              Text('${(heat * 100).toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: color.withValues(alpha: 0.8),
+                  )),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ─── Export bar ───────────────────────────────────────────────────────────────
+
+class _ExportBar extends StatelessWidget {
+  final CoverageReport report;
+  const _ExportBar({required this.report});
+
+  void _copy(BuildContext context, String content, String label) {
+    Clipboard.setData(ClipboardData(text: content));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('$label copied to clipboard'),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _ExportButton(
+          label: 'JSON',
+          icon: Icons.data_object_rounded,
+          color: AppColors.teal,
+          onTap: () => _copy(context, report.toJson(), 'JSON report'),
+        ),
+        const SizedBox(width: 8),
+        _ExportButton(
+          label: 'CSV',
+          icon: Icons.table_chart_rounded,
+          color: AppColors.success,
+          onTap: () => _copy(context, report.toCsv(), 'CSV report'),
+        ),
+        const SizedBox(width: 8),
+        _ExportButton(
+          label: 'Markdown',
+          icon: Icons.article_rounded,
+          color: AppColors.primary,
+          onTap: () => _copy(context, report.toMarkdown(), 'Markdown report'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExportButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  const _ExportButton({
+    required this.label, required this.icon,
+    required this.color, required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withValues(alpha: 0.25)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(height: 4),
+              Text(label,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

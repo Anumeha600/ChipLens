@@ -1,6 +1,9 @@
 // Core models for the local NL→RTL generation pipeline.
 // These are distinct from the backend-API models in generation_result.dart.
 
+import '../backend/diagnostics/diagnostic_source.dart';
+import '../backend/coverage/coverage_report.dart';
+
 class SignalPort {
   final String name;
   final int width;
@@ -80,10 +83,18 @@ class QualityWarning {
   final String message;
   final String severity; // 'critical' | 'warning' | 'info'
 
+  // Extended fields — optional and backward-compatible.
+  // The UI does not need to read these; they exist for test assertions,
+  // analytics, and future display features.
+  final DiagnosticSource source;
+  final String? quickFix;
+
   const QualityWarning({
     required this.type,
     required this.message,
     required this.severity,
+    this.source   = DiagnosticSource.internal,
+    this.quickFix,
   });
 }
 
@@ -137,6 +148,10 @@ class DesignResult {
   final QualityReport quality;
   final String explanation;
 
+  /// Full coverage report from the simulation pass; null when simulation was
+  /// skipped or produced no usable output.
+  final CoverageReport? coverageReport;
+
   const DesignResult({
     required this.spec,
     required this.rtl,
@@ -148,5 +163,6 @@ class DesignResult {
     this.fsmUnreachableStates = const [],
     required this.quality,
     required this.explanation,
+    this.coverageReport,
   });
 }
