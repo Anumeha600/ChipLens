@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import '../verification/verification_result.dart';
+import '../verification/verification_tool.dart';
+import '../verification/process_utilities.dart';
+
 // ──────────────────────────────────────────────────────────────────────────────
 // YosysResult
 // ──────────────────────────────────────────────────────────────────────────────
@@ -28,7 +32,7 @@ class YosysResult {
 /// Runs Yosys synthesis analysis on a Verilog source string.
 ///
 /// Unlike Verilator, Yosys on MSYS2 ships as a native Windows `.exe` and can
-/// be invoked directly via [Process.run] — no bash wrapper is needed.
+/// be invoked directly — no bash wrapper is needed.
 ///
 /// The analysis script runs:
 /// ```
@@ -39,7 +43,7 @@ class YosysResult {
 /// check
 /// stat
 /// ```
-class YosysService {
+class YosysService implements VerificationTool {
   /// Absolute path to the `yosys.exe` binary.
   final String yosysPath;
 
@@ -54,51 +58,52 @@ class YosysService {
       'check\n'
       'stat\n';
 
-  /// Analyze [source] with Yosys synthesis/check passes.
-  ///
-  /// Writes the source to a temp `.v` file alongside a Yosys script, invokes
-  /// `yosys -s script.ys`, and cleans up regardless of outcome.
-  Future<YosysResult> analyze(String source) async {
-    final tempDir = await _makeTempDir();
+  @override
+  String get toolName => 'yosys';
+
+  @override
+  Future<bool> isAvailable() async => File(yosysPath).existsSync();
+
+  /// Implements [VerificationTool.run]: write design + script to a temp dir,
+  /// invoke `yosys -s script.ys`, and return a [VerificationResult].
+  @override
+  Future<VerificationResult> run(VerificationContext context) async {
+    final sw      = Stopwatch()..start();
+    final tempDir = await ProcessUtilities.makeTempDir('chiplens_yosys');
     try {
-      final vFile     = File('${tempDir.path}${Platform.pathSeparator}design.v');
+      final vFile      = File('${tempDir.path}${Platform.pathSeparator}design.v');
       final scriptFile = File('${tempDir.path}${Platform.pathSeparator}script.ys');
 
-      await vFile.writeAsString(source);
+      await vFile.writeAsString(context.rtlSource);
       await scriptFile.writeAsString(_script);
 
-      final result = await Process.run(
+      final result = await ProcessUtilities.runProcess(
         yosysPath,
         ['-s', scriptFile.path],
         workingDirectory: tempDir.path,
       );
+      sw.stop();
 
-      return YosysResult(
-        success:  result.exitCode == 0,
-        exitCode: result.exitCode,
-        stdout:   result.stdout.toString(),
-        stderr:   result.stderr.toString(),
+      return VerificationResult(
+        success:       result.exitCode == 0,
+        exitCode:      result.exitCode,
+        stdout:        result.stdout.toString(),
+        stderr:        result.stderr.toString(),
+        executionTime: sw.elapsed,
       );
     } finally {
-      await _cleanup(tempDir);
+      await ProcessUtilities.cleanupDir(tempDir);
     }
   }
 
-  // ── helpers ────────────────────────────────────────────────────────────────
-
-  Future<Directory> _makeTempDir() async {
-    final ts  = DateTime.now().microsecondsSinceEpoch;
-    final dir = Directory(
-      '${Directory.systemTemp.path}${Platform.pathSeparator}chiplens_yosys_$ts',
+  /// Backward-compatible API: analyze [source] and return a [YosysResult].
+  Future<YosysResult> analyze(String source) async {
+    final vr = await run(VerificationContext(rtlSource: source));
+    return YosysResult(
+      success:  vr.success,
+      exitCode: vr.exitCode,
+      stdout:   vr.stdout,
+      stderr:   vr.stderr,
     );
-    return dir.create(recursive: true);
-  }
-
-  Future<void> _cleanup(Directory dir) async {
-    try {
-      if (await dir.exists()) await dir.delete(recursive: true);
-    } catch (_) {
-      // best-effort — do not mask the original result
-    }
   }
 }

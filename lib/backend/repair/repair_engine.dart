@@ -2,9 +2,7 @@ import '../../models/design_spec.dart';
 import '../../backend/coverage/coverage_report.dart';
 import '../../backend/coverage/coverage_model.dart';
 import '../../backend/diagnostics/diagnostics.dart';
-import '../../backend/tools/verilator_service.dart';
-import '../../backend/tools/yosys_service.dart';
-import '../../backend/tools/icarus_service.dart';
+import '../../backend/verification/verification_runner.dart';
 import '../../backend/tools/rtl_testbench_generator.dart';
 import '../../services/nl_pipeline/quality_analyzer.dart';
 import '../../services/nl_pipeline/testbench_generator.dart';
@@ -13,10 +11,6 @@ import 'repair_suggestion.dart';
 // ─── RepairEngine ─────────────────────────────────────────────────────────────
 
 class RepairEngine {
-  static const _verilator = VerilatorService();
-  static const _yosys     = YosysService();
-  static const _icarus    = IcarusService();
-
   // ── Public API ──────────────────────────────────────────────────────────────
 
   /// Analyse [rtlSource] against [warnings] and return repair suggestions.
@@ -114,9 +108,10 @@ class RepairEngine {
         : TestbenchGenerator.generate(spec);
 
     // 3 — launch all external tools concurrently while the sync analyser runs
-    final verilatorFuture = _lintWithVerilator(repairedRtl);
-    final yosysFuture     = _analyzeWithYosys(repairedRtl);
-    final icarusFuture    = _simulateWithIcarus(repairedRtl, testbench);
+    final verilatorFuture = VerificationRunner.runVerilator(repairedRtl);
+    final yosysFuture     = VerificationRunner.runYosys(repairedRtl);
+    final icarusFuture    = VerificationRunner.runIcarus(repairedRtl, testbench)
+        .then((r) => r.$1);
 
     // 4 — internal quality (synchronous) — acts as "re-run rule engine"
     final newInternal = QualityAnalyzer.analyze(repairedRtl, spec);
@@ -151,30 +146,6 @@ class RepairEngine {
       appliedSuggestions: suggestions,
       newQualityReport:   newQuality,
     );
-  }
-
-  // ── Internal pipeline helpers ───────────────────────────────────────────────
-
-  static Future<List<Diagnostic>> _lintWithVerilator(String rtl) async {
-    try {
-      final r = await _verilator.lint(rtl);
-      return VerilatorDiagnosticParser.parse('${r.stderr}\n${r.stdout}'.trim());
-    } catch (_) { return []; }
-  }
-
-  static Future<List<Diagnostic>> _analyzeWithYosys(String rtl) async {
-    try {
-      final r = await _yosys.analyze(rtl);
-      return YosysParser.parse('${r.stderr}\n${r.stdout}'.trim());
-    } catch (_) { return []; }
-  }
-
-  static Future<List<Diagnostic>> _simulateWithIcarus(
-      String rtl, String testbench) async {
-    try {
-      final r = await _icarus.simulate(rtl, testbench);
-      return IcarusParser.parse('${r.stderr}\n${r.stdout}'.trim());
-    } catch (_) { return []; }
   }
 
   // ── Pattern matchers ────────────────────────────────────────────────────────

@@ -10,9 +10,7 @@
 import '../../models/design_spec.dart';
 import '../../backend/coverage/coverage.dart';
 import '../../backend/diagnostics/diagnostics.dart';
-import '../../backend/tools/verilator_service.dart';
-import '../../backend/tools/yosys_service.dart';
-import '../../backend/tools/icarus_service.dart';
+import '../../backend/verification/verification_runner.dart';
 import 'intent_extractor.dart';
 import 'fsm_builder.dart';
 import 'rtl_generator.dart';
@@ -21,10 +19,6 @@ import 'quality_analyzer.dart';
 import 'explanation_engine.dart';
 
 class LocalPipeline {
-  static const _verilator = VerilatorService();
-  static const _yosys     = YosysService();
-  static const _icarus    = IcarusService();
-
   /// Run all pipeline stages and return a [DesignResult].
   ///
   /// Verilator lint is launched concurrently with [QualityAnalyzer] so the
@@ -47,9 +41,9 @@ class LocalPipeline {
 
     // Stage 5a — launch all external tools concurrently while QualityAnalyzer works
     // Icarus needs both RTL and testbench (available since stage 4 completed above).
-    final verilatorFuture = _lintWithVerilator(rtl);
-    final yosysFuture     = _analyzeWithYosys(rtl);
-    final icarusFuture    = _runIcarus(rtl, testbench);
+    final verilatorFuture = VerificationRunner.runVerilator(rtl);
+    final yosysFuture     = VerificationRunner.runYosys(rtl);
+    final icarusFuture    = VerificationRunner.runIcarus(rtl, testbench);
 
     // Stage 5b — internal quality analysis (synchronous)
     final internalQuality = QualityAnalyzer.analyze(rtl, spec);
@@ -144,47 +138,6 @@ class LocalPipeline {
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
-
-  /// Invoke Verilator and parse its output into [Diagnostic] objects.
-  /// Returns an empty list if Verilator is unavailable or throws.
-  static Future<List<Diagnostic>> _lintWithVerilator(String rtl) async {
-    try {
-      final result   = await _verilator.lint(rtl);
-      final combined = '${result.stderr}\n${result.stdout}'.trim();
-      return VerilatorDiagnosticParser.parse(combined);
-    } catch (_) {
-      return [];
-    }
-  }
-
-  /// Invoke Yosys and parse its output into [Diagnostic] objects.
-  /// Returns an empty list if Yosys is unavailable or throws.
-  static Future<List<Diagnostic>> _analyzeWithYosys(String rtl) async {
-    try {
-      final result   = await _yosys.analyze(rtl);
-      final combined = '${result.stderr}\n${result.stdout}'.trim();
-      return YosysParser.parse(combined);
-    } catch (_) {
-      return [];
-    }
-  }
-
-  /// Compile and simulate with Icarus Verilog.
-  /// Returns `(diagnostics, rawOutput)` — raw output is the combined
-  /// stdout+stderr string, used by [CoverageEngine] after this call returns.
-  /// Returns `([], '')` if Icarus is unavailable or throws.
-  static Future<(List<Diagnostic>, String)> _runIcarus(
-    String rtl,
-    String testbench,
-  ) async {
-    try {
-      final result   = await _icarus.simulate(rtl, testbench);
-      final combined = '${result.stderr}\n${result.stdout}'.trim();
-      return (IcarusParser.parse(combined), combined);
-    } catch (_) {
-      return (<Diagnostic>[], '');
-    }
-  }
 
   /// BFS from entry state to find all reachable states.
   static Set<String> _reachableStates(DesignSpecification spec) {
