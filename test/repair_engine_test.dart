@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:chiplens_lite/backend/repair/repair.dart';
 import 'package:chiplens_lite/models/design_spec.dart';
-import 'package:chiplens_lite/backend/diagnostics/diagnostic_source.dart';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

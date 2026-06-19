@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../../models/design_spec.dart';
 import 'diagnostic.dart';
-import 'diagnostic_source.dart';
 
 /// Accumulates [Diagnostic] objects from external tools (Verilator, Yosys, and
 /// future passes), deduplicates them against an existing [QualityReport]'s

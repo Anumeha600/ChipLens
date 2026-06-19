@@ -1,8 +1,10 @@
 // Core models for the local NL→RTL generation pipeline.
 // These are distinct from the backend-API models in generation_result.dart.
 
-import '../backend/diagnostics/diagnostic_source.dart';
-import '../backend/coverage/coverage_report.dart';
+import 'quality.dart';
+import 'coverage_report.dart';
+
+export 'quality.dart';
 
 class SignalPort {
   final String name;
@@ -75,64 +77,6 @@ class DesignSpecification {
     required this.entryState,
     this.exitStates = const [],
     this.params = const {},
-  });
-}
-
-class QualityWarning {
-  final String type;
-  final String message;
-  final String severity; // 'critical' | 'warning' | 'info'
-
-  // Extended fields — optional and backward-compatible.
-  // The UI does not need to read these; they exist for test assertions,
-  // analytics, and future display features.
-  final DiagnosticSource source;
-  final String? quickFix;
-
-  const QualityWarning({
-    required this.type,
-    required this.message,
-    required this.severity,
-    this.source   = DiagnosticSource.internal,
-    this.quickFix,
-  });
-}
-
-class QualityCategory {
-  final String name;
-  final int score;
-  final int maxScore;
-  final String explanation;
-  final List<String> issues;
-  final List<String> recommendations;
-
-  const QualityCategory({
-    required this.name,
-    required this.score,
-    required this.maxScore,
-    required this.explanation,
-    this.issues = const [],
-    this.recommendations = const [],
-  });
-
-  double get fraction => maxScore > 0 ? score / maxScore : 0.0;
-}
-
-class QualityReport {
-  final int total;
-  final String grade;
-  final Map<String, int> categories;
-  final List<QualityCategory> categoryDetails;
-  final List<QualityWarning> warnings;
-  final int warningCount;
-
-  const QualityReport({
-    required this.total,
-    required this.grade,
-    required this.categories,
-    this.categoryDetails = const [],
-    this.warnings = const [],
-    this.warningCount = 0,
   });
 }
 
