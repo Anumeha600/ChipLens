@@ -19,4 +19,7 @@ enum DiagnosticSource {
 
   /// Emitted by the RTL Coverage Analysis engine.
   coverage,
+
+  /// Emitted by a formal verification engine (SymbiYosys, JasperGold, …).
+  formal,
 }

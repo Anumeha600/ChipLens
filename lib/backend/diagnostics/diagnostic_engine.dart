@@ -52,12 +52,13 @@ class DiagnosticEngine {
   };
 
   // Source priority — lower value = higher priority.
-  // Verilator > Yosys > Icarus for any overlapping canonical keys.
+  // Verilator > Yosys > Icarus > Formal for any overlapping canonical keys.
   static const _sourcePriority = <DiagnosticSource, int>{
     DiagnosticSource.internal:  0,
     DiagnosticSource.verilator: 1,
     DiagnosticSource.yosys:     2,
     DiagnosticSource.icarus:    3,
+    DiagnosticSource.formal:    4,
   };
 
   // Penalty applied to the correctness category per unique external finding.
