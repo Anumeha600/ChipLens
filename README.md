@@ -4,38 +4,25 @@
 
 ChipLens is a research-oriented RTL verification platform that combines compiler-inspired program analysis, semantic reasoning, automated property synthesis, property ranking, formal verification, coverage analysis, diagnostics, and repair assistance into a unified verification workflow for digital hardware designs.
 
-Unlike conventional verification flows that invoke verification tools directly, ChipLens incrementally builds an internal semantic model of the design. The platform extracts structural and behavioral knowledge from RTL, synthesizes candidate verification properties, prioritizes them using an explainable ranking engine, and prepares them for downstream formal verification.
+Unlike conventional verification flows that invoke verification tools directly, ChipLens incrementally builds an internal semantic model of the RTL design. The platform extracts structural and behavioral knowledge, synthesizes candidate verification properties, prioritizes them using an explainable ranking engine, and prepares them for downstream formal verification.
 
-Its modular architecture is designed to support explainable verification, extensibility, and future research in intelligent Electronic Design Automation (EDA) systems.
+The project is designed as a modular reasoning pipeline that explores how semantic analysis, compiler techniques, and formal verification can be integrated into an explainable verification assistant for hardware engineers and researchers.
 
 ---
 
 # Why ChipLens?
 
-Modern RTL verification often relies on multiple independent tools for parsing, simulation, formal verification, coverage analysis, and debugging. While these tools are individually powerful, engineers must still manually interpret results, prioritize verification goals, and determine the next verification step.
+Modern RTL verification often requires engineers to combine multiple independent tools for parsing, simulation, formal verification, coverage analysis, debugging, and repair. Although these tools are individually powerful, interpreting their results and deciding the next verification step remains largely a manual process.
 
-ChipLens investigates a different approach by introducing a reasoning pipeline that understands a hardware design before verification begins. Rather than immediately generating assertions, the system progressively transforms RTL into semantic knowledge, candidate verification properties, and prioritized verification objectives.
+ChipLens investigates a different approach.
 
-This layered architecture explores how compiler techniques, semantic reasoning, and formal verification can be integrated into an explainable verification assistant for digital hardware engineers.
+Instead of immediately generating assertions or invoking formal engines, ChipLens first develops an internal understanding of the hardware design through a sequence of reasoning stages. Each stage enriches the available information before passing it to the next stage, enabling explainable verification decisions and a modular architecture that is easy to extend.
 
----
-
-# Key Features
-
-* RTL Parsing and Analysis
-* Design Intelligence Framework
-* Semantic Evidence Extraction
-* Candidate Property Synthesis
-* Property Ranking Engine
-* Formal Verification Integration
-* Coverage Analysis
-* Diagnostics Engine
-* Automated Repair Suggestions
-* Modular, Extensible Verification Pipeline
+The long-term vision is to build an intelligent verification assistant capable of helping engineers throughout the complete verification lifecycle—from design understanding to automated verification planning, diagnostics, and repair.
 
 ---
 
-# Current Architecture
+# Verification Pipeline
 
 ```text
 RTL Source
@@ -70,28 +57,147 @@ Repair Suggestions
 
 ---
 
-# Technology Stack
+# Key Features
 
-* Flutter
-* Dart
-* Yosys
-* SymbiYosys
-* Verilator
-* Icarus Verilog
+* RTL Parsing and Structural Analysis
+* Design Intelligence Framework
+* Semantic Evidence Extraction
+* Candidate Property Synthesis
+* Property Ranking Engine
+* Formal Verification Integration
+* Coverage Analysis
+* Diagnostics Engine
+* Automated Repair Suggestions
+* Explainable Verification Pipeline
+* Modular and Extensible Architecture
 
 ---
 
-# Current Status
+# Current Progress
 
-Completed frameworks include:
+## Completed
 
+* RTL Parsing Infrastructure
 * Design Intelligence Framework
 * Property Inference Framework
 * Semantic Evidence Framework
 * Candidate Property Synthesizer
 * Property Ranking Engine
+* Coverage Analysis
+* Diagnostics Framework
+* Repair Framework
+* Flutter Desktop Interface
+* 500+ automated tests
 
-The next milestone is the **Property Emitter**, which will translate ranked candidate properties into formal assertions for downstream formal verification.
+## In Progress
+
+* Property Emitter
+
+## Planned
+
+* Verification Planning
+* Explainable Property Generation
+* Intelligent Verification Scheduling
+* Advanced Repair Intelligence
+
+---
+
+# Repository Structure
+
+```text
+lib/
+├── backend/
+│   ├── design_intelligence/
+│   ├── property_inference/
+│   │   ├── semantic/
+│   │   ├── synthesizer/
+│   │   └── ranking/
+│   ├── coverage/
+│   ├── diagnostics/
+│   ├── repair/
+│   └── formal/
+│
+├── models/
+├── services/
+├── widgets/
+└── screens/
+
+test/
+docs/
+```
+
+---
+
+# Technology Stack
+
+### Frontend
+
+* Flutter
+* Dart
+
+### Verification
+
+* SymbiYosys
+* Yosys
+* Verilator
+* Icarus Verilog
+
+### Development
+
+* Git
+* GitHub
+
+---
+
+# Design Philosophy
+
+ChipLens follows a layered architecture inspired by modern compiler design.
+
+Instead of combining all verification logic into a single engine, each reasoning stage performs one well-defined transformation before passing immutable results to the next stage.
+
+This separation of concerns improves maintainability, explainability, extensibility, and testing while allowing future reasoning modules to be integrated without modifying existing components.
+
+---
+
+# Project Goals
+
+* Improve automation in RTL verification.
+* Provide explainable verification decisions.
+* Reduce manual effort in property generation.
+* Combine semantic reasoning with formal verification.
+* Build a modular research platform for intelligent EDA systems.
+
+---
+
+# Current Status
+
+ChipLens is under active development.
+
+The current implementation includes the complete reasoning pipeline up to **Property Ranking**. Future milestones focus on property emission, explainable verification, intelligent verification planning, and deeper integration with formal verification engines.
+
+---
+
+# Roadmap
+
+### ✅ Completed
+
+* Design Intelligence Framework
+* Property Inference Framework
+* Semantic Evidence Framework
+* Property Synthesizer
+* Property Ranking Engine
+
+### 🚧 In Progress
+
+* Property Emitter
+
+### 📌 Planned
+
+* Explainable Verification
+* Verification Planner
+* Advanced Coverage Intelligence
+* Counterexample Analysis
+* Intelligent Repair Planning
 
 ---
 
@@ -99,4 +205,10 @@ The next milestone is the **Property Emitter**, which will translate ranked cand
 
 ChipLens aims to bridge compiler technology, semantic reasoning, and formal verification to create an intelligent verification assistant capable of understanding, reasoning about, and verifying complex RTL designs.
 
-The long-term vision is to develop an explainable verification platform that assists engineers throughout the complete verification lifecycle—from design understanding to automated verification planning, diagnostics, and repair.
+The long-term objective is to contribute toward next-generation Electronic Design Automation (EDA) systems that combine explainable AI techniques with rigorous hardware verification.
+
+---
+
+# License
+
+This project is released under the MIT License.
