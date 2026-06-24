@@ -1,0 +1,9 @@
+export 'coverage_workspace.dart';
+export 'dashboard_workspace.dart';
+export 'diagnostics_workspace.dart';
+export 'repair_workspace.dart';
+export 'rtl_workspace.dart';
+export 'verification_workspace.dart';
+export 'workspace.dart';
+export 'workspace_host.dart';
+export 'workspace_registry.dart';
