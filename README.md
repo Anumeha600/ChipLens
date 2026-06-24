@@ -9,7 +9,7 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-1328%2B-success)
+![Tests](https://img.shields.io/badge/tests-2187%2B-success)
 
 </p>
 
@@ -35,7 +35,9 @@ The project combines semantic analysis, deterministic property synthesis, explai
 - End-to-end verification orchestration
 - Immutable data models
 - Deterministic execution pipeline
-- **1328+ automated tests**
+- Benchmark harness with reproducible results
+- Case studies with honest evaluation
+- **2187+ automated tests**
 - **0 failing tests**
 - Active research and development
 
@@ -49,7 +51,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 | Development | Active |
 | Platform | Flutter + Dart |
 | License | MIT |
-| Automated Tests | **1328+ Passing** |
+| Automated Tests | **2187+ Passing** |
 | Test Failures | **0** |
 | Architecture | Layered & Modular |
 | Verification Pipeline | Complete |
@@ -61,6 +63,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 - [System Architecture](#system-architecture)
 - [Verification Pipeline](#verification-pipeline)
 - [Core Frameworks](#core-frameworks)
+- [Evaluation](#evaluation)
 - [Project Status](#project-status)
 - [Technology Stack](#technology-stack)
 - [Repository Structure](#repository-structure)
@@ -245,6 +248,44 @@ Verification Session Result
 
 ---
 
+## Evaluation
+
+ChipLens includes a benchmark harness that measures the complete analysis pipeline against representative RTL designs and generates reproducible evaluation reports.
+
+### Benchmark Results (2026-06-24)
+
+| Design | Description | Diagnostics | Repairs | Runtime (ms) |
+|--------|-------------|-------------|---------|--------------|
+| counter | 4-bit sync counter | 1 | 1 | 3 |
+| fsm | 3-state traffic light FSM | 1 | 1 | 2 |
+| alu | 32-bit combinational ALU | 1 | 1 | 2 |
+| fifo | Parameterized sync FIFO | 1 | 1 | 3 |
+| uart | UART TX, 4-state FSM | 1 | 1 | 4 |
+
+All 5 designs complete successfully. Average pipeline runtime: **3 ms** per design.
+
+> **Note:** The benchmark pipeline does not execute formal verification. Coverage assessments are derived from a structural complexity heuristic. These results measure the performance of ChipLens's reasoning frameworks, not the output of a complete formal verification run.
+
+### Evaluation Artifacts
+
+| Document | Description |
+|----------|-------------|
+| [docs/evaluation/benchmark_results.md](docs/evaluation/benchmark_results.md) | Raw benchmark output from actual pipeline execution |
+| [docs/evaluation/evaluation_summary.md](docs/evaluation/evaluation_summary.md) | Aggregate results, architectural findings, and limitations |
+| [docs/evaluation/case_study_counter.md](docs/evaluation/case_study_counter.md) | Case study: 4-bit synchronous counter |
+| [docs/evaluation/case_study_fsm.md](docs/evaluation/case_study_fsm.md) | Case study: 3-state traffic light FSM |
+| [docs/evaluation/case_study_fifo.md](docs/evaluation/case_study_fifo.md) | Case study: Parameterized synchronous FIFO |
+| [docs/evaluation/case_study_uart.md](docs/evaluation/case_study_uart.md) | Case study: UART transmitter (8N1 protocol) |
+
+### Running the Benchmark
+
+```bash
+# Run the benchmark suite (generates docs/evaluation/benchmark_results.md)
+flutter test test/benchmarks/benchmark_suite_test.dart
+```
+
+---
+
 # Architectural Characteristics
 
 The architecture intentionally separates **reasoning** from **execution**.
@@ -278,7 +319,7 @@ The implementation now provides a complete end-to-end verification reasoning pip
 | Current Version | **v1.0.0** |
 | Development Status | Active |
 | Core Reasoning Frameworks | 14 |
-| Automated Tests | **1328+ Passing Tests** |
+| Automated Tests | **2187+ Passing Tests** |
 | Test Failures | **0** |
 | Layered Architecture | ✅ |
 | Deterministic Pipeline | ✅ |
@@ -288,6 +329,8 @@ The implementation now provides a complete end-to-end verification reasoning pip
 | Cross-Framework Diagnostics | ✅ |
 | Verification Planning | ✅ |
 | Repair Planning | ✅ |
+| Benchmark Harness | ✅ |
+| Evaluation Artifacts | ✅ |
 
 ---
 
@@ -333,9 +376,18 @@ ChipLens/
 │   │   ├── widgets/
 │   │   └── screens/
 │   │
+│   ├── benchmarks/             ← benchmark harness (outside lib/)
+│   │   ├── models/
+│   │   ├── runner/
+│   │   └── reports/
+│   │
 │   └── test/
+│       ├── integration/system/ ← system integration tests
+│       ├── benchmarks/         ← benchmark tests
+│       └── fixtures/rtl/       ← Verilog fixtures
 │
 ├── docs/
+│   └── evaluation/             ← benchmark results & case studies
 ├── LICENSE
 ├── README.md
 └── CHANGELOG.md
@@ -369,7 +421,7 @@ Each framework has a clearly defined responsibility and can evolve independently
 
 ## Testability
 
-Every major reasoning framework is independently unit tested. The complete platform currently contains **1328+ automated tests**, helping ensure architectural stability as the project evolves.
+Every major reasoning framework is independently unit tested. The complete platform currently contains **2187+ automated tests**, helping ensure architectural stability as the project evolves.
 
 ## Extensibility
 
@@ -483,16 +535,18 @@ Current priorities include:
 
 ---
 
-## Phase 3 — Experimental Evaluation
+## Phase 3 — Experimental Evaluation 🚧
 
-Planned work includes:
+In progress:
 
-- Benchmark suite development
-- Performance evaluation
-- Coverage evaluation
+- ✅ Benchmark suite (`benchmarks/` harness, 5 RTL fixtures)
+- ✅ Reproducible benchmark reports (`docs/evaluation/benchmark_results.md`)
+- ✅ Case studies (counter, FSM, FIFO, UART)
+- ✅ Evaluation summary with limitations and future directions
+- Performance evaluation against larger RTL designs
+- Coverage evaluation with formal tool integration
 - Property ranking evaluation
 - Explainability assessment
-- Reproducible experiments
 
 ---
 
