@@ -286,6 +286,37 @@ flutter test test/benchmarks/benchmark_suite_test.dart
 
 ---
 
+### Evaluation Progress
+
+ChipLens is being evaluated against external open-source RTL designs that were not created for ChipLens. These evaluations measure structural detection accuracy and diagnostic reliability on real-world designs.
+
+**Completed evaluations:**
+
+| Design | Tier | Lines | Runtime | Diagnostics | FP Count | Status |
+|--------|------|-------|---------|-------------|----------|--------|
+| [wb2axip skidbuffer](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | 1 | 57 (preprocessed) | 30 ms | 1 (medium) | 1/1 | Complete |
+
+**Open-source evaluation artifacts:**
+
+| Document | Description |
+|----------|-------------|
+| [docs/evaluation/open_source/open_source_evaluation_plan.md](docs/evaluation/open_source/open_source_evaluation_plan.md) | 4-phase evaluation roadmap |
+| [docs/evaluation/open_source/design_selection.md](docs/evaluation/open_source/design_selection.md) | Candidate designs and selection rationale |
+| [docs/evaluation/open_source/evaluation_methodology.md](docs/evaluation/open_source/evaluation_methodology.md) | Inputs, outputs, metrics, and procedure |
+| [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer |
+
+**Key findings from wb2axip skidbuffer (Phase 1):**
+
+- Handshake protocol (`valid_ready`) correctly detected from signal names alone
+- Reset signal (`i_reset`) not detected — the `i_` direction prefix is not in the reset name heuristic
+- One false-positive register (`istered`) generated from the word "registered" in a comment — comment text is not stripped before analysis
+- The single diagnostic ("Coverage moderate") is a false positive for a formally verified design (FP rate: 100%)
+- Pipeline completes successfully on real-world RTL in 30 ms
+
+**Next:** Phase 1 evaluation continues. PicoRV32 evaluation blocked on comment-stripping fix (high-priority improvement identified by skidbuffer evaluation).
+
+---
+
 # Architectural Characteristics
 
 The architecture intentionally separates **reasoning** from **execution**.
