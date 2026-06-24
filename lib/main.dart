@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
-import 'home_screen.dart';
+import 'ui/workbench/workbench.dart';
 import 'services/backend_discovery.dart';
 
 void main() {
@@ -43,7 +43,7 @@ class _ChipLensAppState extends State<ChipLensApp> {
             if (snap.connectionState != ConnectionState.done) {
               return const _SplashScreen();
             }
-            return const HomeScreen();
+            return const WorkbenchHome();
           },
         ),
       ),
