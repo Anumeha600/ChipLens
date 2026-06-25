@@ -23,14 +23,16 @@ class CounterProvider implements KnowledgeProvider {
   // ── Regex ────────────────────────────────────────────────────────────────
 
   // Counter-named registers: reg [N:0] <counter_name>
+  // (?!\w) prevents matching 'reg' as a prefix inside longer identifiers.
   static final _counterDeclRe = RegExp(
-    r'\breg\s*(?:\[(\d+):0\])?\s*(\w*(?:cnt|count|counter|idx|index)\w*)',
+    r'\breg(?!\w)\s*(?:\[(\d+):0\])?\s*(\w*(?:cnt|count|counter|idx|index)\w*)',
     caseSensitive: false,
   );
 
-  // All reg declarations — to capture width for signals found via assignment
+  // All reg declarations — to capture width for signals found via assignment.
+  // (?!\w) prevents matching 'reg' as a prefix inside longer identifiers.
   static final _regDeclRe = RegExp(
-    r'\breg\s*\[(\d+):0\]\s*(\w+)',
+    r'\breg(?!\w)\s*\[(\d+):0\]\s*(\w+)',
     caseSensitive: false,
   );
 

@@ -25,8 +25,9 @@ class FSMProvider implements KnowledgeProvider {
   // ── Regex ────────────────────────────────────────────────────────────────
 
   // State register: reg [N:0] <something with "state" in the name>
+  // (?!\w) prevents matching 'reg' as a prefix inside longer identifiers.
   static final _stateRegRe = RegExp(
-    r'\breg\s*(?:\[(\d+):\d+\])?\s*(\w*state\w*)',
+    r'\breg(?!\w)\s*(?:\[(\d+):\d+\])?\s*(\w*state\w*)',
     caseSensitive: false,
   );
 

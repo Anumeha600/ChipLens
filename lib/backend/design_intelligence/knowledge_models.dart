@@ -131,7 +131,7 @@ class CounterInfo {
 class RegisterInfo {
   final String name;
 
-  /// Declared bit-width (1 for single-bit signals).
+  /// Declared bit-width of each element (1 for single-bit signals).
   final int width;
 
   /// Driven from a clocked `always @(posedge ...)` block.
@@ -140,17 +140,26 @@ class RegisterInfo {
   /// Driven by an `assign` statement or `always @(*)` block.
   final bool isCombinational;
 
+  /// True when the declaration is a memory array (`reg [W:0] name [D:0]`).
+  final bool isMemoryArray;
+
+  /// Number of entries in the memory array; 0 for scalar registers.
+  final int depth;
+
   const RegisterInfo({
     required this.name,
     this.width           = 1,
     this.isSequential    = false,
     this.isCombinational = false,
+    this.isMemoryArray   = false,
+    this.depth           = 0,
   });
 
   @override
   String toString() {
     final kind = isSequential ? 'sequential' : 'combinational';
-    return 'RegisterInfo($name, ${width}b, $kind)';
+    final size = isMemoryArray ? '$depth×${width}b' : '${width}b';
+    return 'RegisterInfo($name, $size, $kind)';
   }
 }
 

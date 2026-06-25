@@ -25,9 +25,11 @@ class RegisterProvider implements KnowledgeProvider {
 
   // ── Regex ────────────────────────────────────────────────────────────────
 
-  // All reg declarations with optional bit-width.
+  // All reg declarations: optional packed width, identifier, optional depth.
+  // (?!\w) ensures the 'reg' keyword is not matched as a prefix of identifiers
+  // like 'regs', 'register', 'reg_data', etc.
   static final _regDeclRe = RegExp(
-    r'\breg\s*(?:\[(\d+):\d+\])?\s*(\w+)',
+    r'\breg(?!\w)\s*(?:\[(\d+):\d+\])?\s*(\w+)\s*(?:\[(\d+):(\d+)\])?',
     caseSensitive: false,
   );
 
@@ -43,15 +45,35 @@ class RegisterProvider implements KnowledgeProvider {
     caseSensitive: false,
   );
 
+  // Port, wire, and logic declarations — used to infer widths for assign
+  // targets that have no reg declaration.
+  // Matches: (input|output|inout|wire|logic) [reg] [N:M] name
+  static final _widthDeclRe = RegExp(
+    r'\b(?:input|output|inout|wire|logic)\s+(?:reg\s+)?'
+    r'(?:\[(\d+):\d+\])?\s*(\w+)',
+    caseSensitive: false,
+  );
+
   // ── Analysis ─────────────────────────────────────────────────────────────
 
   @override
   Future<KnowledgeResult> analyze(DesignContext context) async {
-    final rtl         = context.rtlSource;
-    final registers   = <RegisterInfo>[];
-    final seen        = <String>{};
+    final rtl       = context.rtlSource;
+    final registers = <RegisterInfo>[];
+    final seen      = <String>{};
 
     final hasSeqBlock = _posedgeBlockRe.hasMatch(rtl);
+
+    // Build width map from port/wire/logic declarations for assign-target
+    // width inference.  Only entries with an explicit [N:M] are stored;
+    // 1-bit signals fall back to the default width of 1.
+    final declaredWidths = <String, int>{};
+    for (final m in _widthDeclRe.allMatches(rtl)) {
+      final highBit = m.group(1);
+      if (highBit != null) {
+        declaredWidths[m.group(2)!] = int.parse(highBit) + 1;
+      }
+    }
 
     // Collect assign targets — these are combinational regardless of type.
     final combNames = <String>{};
@@ -61,28 +83,37 @@ class RegisterProvider implements KnowledgeProvider {
 
     // Walk all reg declarations.
     for (final m in _regDeclRe.allMatches(rtl)) {
-      final highBit      = m.group(1);
-      final name         = m.group(2)!;
+      final highBit   = m.group(1);
+      final name      = m.group(2)!;
+      final depthHigh = m.group(3);
+      final depthLow  = m.group(4);
       if (!seen.add(name)) continue;
 
-      final width        = highBit != null ? int.parse(highBit) + 1 : 1;
-      final isComb       = combNames.contains(name);
-      final isSeq        = hasSeqBlock && !isComb;
+      final width   = highBit != null ? int.parse(highBit) + 1 : 1;
+      final isArray = depthHigh != null && depthLow != null;
+      final depth   = isArray
+          ? (int.parse(depthHigh) - int.parse(depthLow)).abs() + 1
+          : 0;
+      final isComb  = combNames.contains(name);
+      final isSeq   = hasSeqBlock && !isComb;
 
       registers.add(RegisterInfo(
         name:            name,
         width:           width,
         isSequential:    isSeq,
         isCombinational: isComb,
+        isMemoryArray:   isArray,
+        depth:           depth,
       ));
     }
 
     // Emit combinational-only signals from assign that are not declared as reg.
+    // Use declared port/wire width when available; default to 1.
     for (final name in combNames) {
       if (seen.contains(name)) continue;
       registers.add(RegisterInfo(
         name:            name,
-        width:           1,
+        width:           declaredWidths[name] ?? 1,
         isSequential:    false,
         isCombinational: true,
       ));

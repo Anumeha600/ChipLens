@@ -295,6 +295,7 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 | Design | Tier | Lines | Runtime | Diagnostics | FP Severity | Status |
 |--------|------|-------|---------|-------------|-------------|--------|
 | [wb2axip skidbuffer](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | 1 | 57 | 23 ms | 1 (low) | low | Updated post-calibration |
+| [PicoRV32 register file](docs/evaluation/open_source/picorv32_module_evaluation.md) | 1 | 16 | 32 ms | 1 (low) | low | Updated post-parser-calibration |
 
 **Open-source evaluation artifacts:**
 
@@ -304,6 +305,7 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 | [docs/evaluation/open_source/design_selection.md](docs/evaluation/open_source/design_selection.md) | Candidate designs and selection rationale |
 | [docs/evaluation/open_source/evaluation_methodology.md](docs/evaluation/open_source/evaluation_methodology.md) | Inputs, outputs, metrics, and procedure |
 | [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer (with before/after calibration table) |
+| [docs/evaluation/open_source/picorv32_module_evaluation.md](docs/evaluation/open_source/picorv32_module_evaluation.md) | Phase 1 evaluation: PicoRV32 register file — before/after parser calibration table |
 
 **Heuristic calibration (Sprint H Task 3) — measured improvements on wb2axip skidbuffer:**
 
@@ -319,7 +321,30 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 - 1 diagnostic still produced for a formally verified design — the heuristic has no knowledge of formal verification status
 - `o_ready` still misclassified as sequential (driven by `always @(*)`); deferred improvement
 
-**Next:** Proceed to PicoRV32 evaluation. Both blocking issues (comment false positives, reset name mismatch) are resolved. 110 new regression tests added in `test/heuristics/`.
+**PicoRV32 register file evaluation (Sprint H Task 4) — three parser bugs identified:**
+
+| Failure mode | Root cause | Fixed in |
+|-------------|------------|----------|
+| `s` false positive from `regs[...]` | `\breg` word-prefix match inside identifiers | Sprint H Task 5 |
+| Memory array depth not captured | `[0:31]` dimension ignored | Sprint H Task 5 |
+| Assign-target width = 1 | Port widths not cross-referenced | Sprint H Task 5 |
+
+**Parser robustness calibration (Sprint H Task 5) — measured improvements on picorv32_regs:**
+
+| Metric | Before (Task 4) | After (Task 5) |
+|--------|----------------|----------------|
+| False positive `s` | present | **absent** |
+| `regs.isMemoryArray` | false | **true** |
+| `regs.depth` | 0 | **32** |
+| `rdata1.width`, `rdata2.width` | 1 | **32** |
+| `registers.length` | 4 | **3** |
+| `complexity` | 4 | **3** |
+| `overallCoverage` | 77% (moderate) | **82% (low)** |
+| `verificationHealth` | reduced | **acceptable** |
+
+100 new regression tests added in `test/parser_regressions/` (keyword_boundary, memory_array, width_inference, picorv32_regression, fsm_counter_keyword_boundary). 2397 total tests pass.
+
+**Next:** Proceed to main `picorv32` module evaluation. All parser bugs found in the register file module are fixed and regression-tested.
 
 ---
 
