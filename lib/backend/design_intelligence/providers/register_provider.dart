@@ -59,9 +59,10 @@ class RegisterProvider implements KnowledgeProvider {
   // Identifier (starting with letter/underscore) for concat content extraction
   static final _identInConcatRe = RegExp(r'\b([a-zA-Z_]\w*)\b');
 
-  // always @(posedge …) → the module has a clocked domain
+  // always/@always_ff @(posedge …) → the module has a clocked domain.
+  // The (?:_ff)? handles SystemVerilog always_ff blocks.
   static final _posedgeBlockRe = RegExp(
-    r'\balways\s*@\s*\(\s*posedge',
+    r'\balways(?:_ff)?\s*@\s*\(\s*posedge',
     caseSensitive: false,
   );
 
@@ -70,8 +71,12 @@ class RegisterProvider implements KnowledgeProvider {
   //   1: numeric high bit  — null when no numeric bracket
   //   2: symbolic expr     — non-null for e.g. [B:0], [WIDTH-1:0]
   //   3: signal name
+  // (?:(?:logic|wire|reg)\s+)? handles SystemVerilog type qualifiers:
+  //   output logic [W:0] sig  — logic consumed, [W:0] seen as width bracket
+  //   output wire  [W:0] sig  — wire consumed (Verilog convention)
+  //   output reg   [W:0] sig  — reg consumed (Verilog registered output)
   static final _widthDeclRe = RegExp(
-    r'\b(?:input|output|inout|wire|logic)\s+(?:(?:wire|reg)\s+)?'
+    r'\b(?:input|output|inout|wire|logic)\s+(?:(?:logic|wire|reg)\s+)?'
     r'(?:\[(\d+):\d+\]|\[([^\]]*)\])?\s*(\w+)',
     caseSensitive: false,
   );

@@ -9,7 +9,7 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-2514%2B-success)
+![Tests](https://img.shields.io/badge/tests-2553%2B-success)
 
 </p>
 
@@ -37,7 +37,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 - Deterministic execution pipeline
 - Benchmark harness with reproducible results
 - Case studies with honest evaluation
-- **2514+ automated tests**
+- **2553+ automated tests**
 - **0 failing tests**
 - Active research and development
 
@@ -51,7 +51,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 | Development | Active |
 | Platform | Flutter + Dart |
 | License | MIT |
-| Automated Tests | **2514+ Passing** |
+| Automated Tests | **2553+ Passing** |
 | Test Failures | **0** |
 | Architecture | Layered & Modular |
 | Verification Pipeline | Complete |
@@ -368,7 +368,25 @@ Parser improvements from wb2axip and PicoRV32 generalize: zero false positives a
 
 117 new tests in `test/parameterized_rtl/` (registers, ports, memories, concatenation, SERV). 2514 total tests pass. SERV post-Task-7: 6 registers, complexity=6, 67% coverage, moderate risk.
 
-**Next:** Proceed to Ibex evaluation — parameterized RTL is no longer a blind spot.
+**Ibex cross-project evaluation (Sprint H Task 8) — three SystemVerilog defects found and fixed:**
+
+| Defect | Pattern fixed | Impact |
+|--------|--------------|--------|
+| `always_ff` not in sequential block detector | `_posedgeBlockRe`: `\balways` → `\balways(?:_ff)?` | Regs in SV always_ff now correctly sequential |
+| `always_ff` not in async reset detector | `_asyncSensRe`: `always\s*@` → `always(?:_ff)?\s*@` | Ibex `rst_ni`: sync FP fixed → async correct |
+| `output logic [W:0]` width invisible | `_widthDeclRe`: `(?:(?:wire\|reg)\s+)?` → `(?:(?:logic\|wire\|reg)\s+)?` | `rdata_a_o`, `rdata_b_o`: widthIsKnown=false ✓ |
+
+Ibex post-fix: `clk_i` primary ✓, `rst_ni` async active-low ✓, 2 combinational outputs detected (rf_reg_q logic arrays are architecture-scope limitation — requires SV calibration sprint). 39 new tests in `test/sv_compatibility/`. 2553 total tests pass.
+
+| Metric | wb2axip | PicoRV32 regs | SERV ALU | Ibex reg file |
+|--------|---------|--------------|----------|--------------|
+| Language | Verilog | Verilog | Verilog | **SystemVerilog** |
+| Clock correct | candidate | primary ✓ | primary ✓ | primary ✓ |
+| Reset type correct | FN | n/a | n/a | **fixed: async ✓** |
+| Register count | 4/4 | 4/4 | 6/6 | 2/34 (logic gap) |
+| New defects found | 2 | 1 | 0 | **3** (all fixed) |
+
+**Generalization verdict:** Parser fully generalizes to Verilog. For SystemVerilog, `always_ff` and `output logic` patterns now handled correctly; `logic`-declared sequential arrays require a dedicated SV calibration sprint.
 
 ---
 

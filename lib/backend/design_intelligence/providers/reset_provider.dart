@@ -39,9 +39,10 @@ class ResetProvider implements KnowledgeProvider {
 
   // ── Regex ────────────────────────────────────────────────────────────────
 
-  // Sensitivity list with two edges: always @(posedge CLK or [pos/neg]edge RST)
+  // Sensitivity list with two edges: always/@always_ff @(posedge CLK or [pos/neg]edge RST)
+  // The (?:_ff)? handles SystemVerilog always_ff blocks with async resets.
   static final _asyncSensRe = RegExp(
-    r'always\s*@\s*\(\s*posedge\s+\w+\s+or\s+(posedge|negedge)\s+(\w+)\s*\)',
+    r'always(?:_ff)?\s*@\s*\(\s*posedge\s+\w+\s+or\s+(posedge|negedge)\s+(\w+)\s*\)',
     caseSensitive: false,
   );
 
