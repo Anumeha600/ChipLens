@@ -507,7 +507,7 @@ Each framework has a clearly defined responsibility and can evolve independently
 
 ## Testability
 
-Every major reasoning framework is independently unit tested. The complete platform currently contains **2187+ automated tests**, helping ensure architectural stability as the project evolves.
+Every major reasoning framework is independently unit tested. The complete platform currently contains **2514+ automated tests**, helping ensure architectural stability as the project evolves.
 
 ## Extensibility
 
@@ -584,7 +584,7 @@ flutter analyze
 
 # Project Roadmap
 
-ChipLens has completed its **Core Reasoning Platform (v1.0.0)**.
+ChipLens has completed its **Core Reasoning Platform (v1.5.0)**.
 
 Development now focuses on transforming the platform into a mature research and engineering ecosystem.
 
