@@ -3,6 +3,7 @@
 // Consumers import only this file; the internal layout may evolve without
 // breaking import paths.
 export 'design_context.dart';
+export 'rtl_preprocessor.dart';
 export 'design_knowledge.dart';
 export 'design_runner.dart';
 export 'knowledge_models.dart';

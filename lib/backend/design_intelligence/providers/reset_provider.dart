@@ -20,7 +20,17 @@ import '../knowledge_result.dart';
 /// always @(posedge clk) begin
 ///   if (!rst_n) ...    → sync, active-low
 ///   if (rst)    ...    → sync, active-high
+///   if (i_reset) ...   → sync, active-high (ZipCPU / direction-prefix style)
 /// ```
+///
+/// **Supported reset naming conventions:**
+///
+/// | Convention | Example | Notes |
+/// |-----------|---------|-------|
+/// | Bare name | `rst`, `reset`, `arst`, `srst`, `nrst`, `rstb`, `areset`, `sreset` | Original |
+/// | With suffix | `rst_n`, `reset_n`, `resetn`, `aresetn` | Starts with bare name |
+/// | Direction prefix `i_` | `i_rst`, `i_reset`, `i_arst`, `i_rst_n` | ZipCPU / AXI convention |
+/// | Direction suffix `_i` | `rst_i`, `reset_i` | AXI/AMBA convention |
 class ResetProvider implements KnowledgeProvider {
   const ResetProvider();
 
@@ -47,8 +57,14 @@ class ResetProvider implements KnowledgeProvider {
     caseSensitive: false,
   );
 
+  // Reset name patterns.
+  //
+  // The optional `(?:i_)?` prefix supports ZipCPU/AXI direction-prefix
+  // conventions (`i_reset`, `i_rst`, `i_rst_n`).  Direction suffix (`_i`)
+  // is covered automatically because names like `rst_i` already start with
+  // `rst`, which the bare-name alternation matches.
   static final _resetNameRe = RegExp(
-    r'^(rst|reset|arst|srst|nrst|rstb|areset|sreset)',
+    r'^(?:i_)?(rst|reset|arst|srst|nrst|rstb|areset|sreset)',
     caseSensitive: false,
   );
 

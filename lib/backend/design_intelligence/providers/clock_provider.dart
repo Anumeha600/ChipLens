@@ -9,10 +9,19 @@ import '../knowledge_result.dart';
 /// sensitivity lists.
 ///
 /// Classification:
-/// - **Primary** — name starts with a well-known clock prefix
-///   (`clk`, `clock`, `sys_clk`, `pclk`, `aclk`, `hclk`, `mclk`, `sclk`).
+/// - **Primary** — name exactly matches one of the recognised clock names.
 /// - **Candidate** — appears in a posedge trigger but name is non-standard.
 /// - **Generated** — reserved for future derived-clock inference (always false).
+///
+/// **Supported primary clock naming conventions:**
+///
+/// | Convention | Examples | Notes |
+/// |-----------|---------|-------|
+/// | Bare name | `clk`, `clock` | Most common |
+/// | Prefixed bare | `sys_clk`, `ref_clk`, `pclk`, `aclk`, `hclk`, `mclk`, `sclk`, `osc_clk` | Original set |
+/// | Direction prefix | `i_clk`, `i_clock` | ZipCPU / AXI convention |
+/// | Direction suffix | `clk_i`, `clock_i` | AMBA / lowRISC convention |
+/// | Domain-qualified | `core_clk`, `system_clock` | Common in SoC designs |
 class ClockProvider implements KnowledgeProvider {
   const ClockProvider();
 
@@ -24,9 +33,12 @@ class ClockProvider implements KnowledgeProvider {
   // Matches any posedge signal, whether inside a sensitivity list or expression.
   static final _posedgeRe = RegExp(r'\bposedge\s+(\w+)', caseSensitive: false);
 
-  // Primary clock name: must start with one of the well-known prefixes.
+  // Primary clock name: must exactly match one of the recognised clock names.
+  // Names are anchored at start and end to avoid matching e.g. "fast_clk"
+  // as a primary clock via partial prefix overlap.
   static final _primaryRe = RegExp(
-    r'^(clk|clock|sys_clk|ref_clk|pclk|aclk|hclk|mclk|sclk|osc_clk)',
+    r'^(clk|clock|sys_clk|ref_clk|pclk|aclk|hclk|mclk|sclk|osc_clk'
+    r'|i_clk|clk_i|clock_i|i_clock|core_clk|system_clock)$',
     caseSensitive: false,
   );
 

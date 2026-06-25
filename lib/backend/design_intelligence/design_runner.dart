@@ -9,6 +9,7 @@ import 'providers/handshake_provider.dart';
 import 'providers/module_provider.dart';
 import 'providers/register_provider.dart';
 import 'providers/reset_provider.dart';
+import 'rtl_preprocessor.dart';
 
 // ─── DesignRunner ─────────────────────────────────────────────────────────────
 
@@ -16,9 +17,11 @@ import 'providers/reset_provider.dart';
 /// a single [DesignKnowledge].
 ///
 /// **No provider-specific logic lives here.**  The runner only:
-/// 1. Discovers which providers to run (defaults or caller-supplied list).
-/// 2. Executes every provider concurrently via [Future.wait].
-/// 3. Merges all [KnowledgeResult] objects into [DesignKnowledge].
+/// 1. Strips Verilog comments from the source so that comment text cannot
+///    produce false-positive structural detections.
+/// 2. Discovers which providers to run (defaults or caller-supplied list).
+/// 3. Executes every provider concurrently via [Future.wait].
+/// 4. Merges all [KnowledgeResult] objects into [DesignKnowledge].
 ///
 /// Adding a new provider requires only inserting it into [_defaultProviders]
 /// and extending [KnowledgeResult] / [DesignKnowledge] with the new type.
@@ -41,14 +44,29 @@ abstract class DesignRunner {
   /// Run every provider in [providers] (or the built-in defaults) concurrently
   /// against [context] and return the merged [DesignKnowledge].
   ///
+  /// Comments are stripped from [context.rtlSource] before any provider sees
+  /// the source.  This prevents comment text from producing false-positive
+  /// structural detections (e.g. the word "registered" in a comment should
+  /// not be captured as a register named "istered").
+  ///
   /// Individual provider failures are silenced — a failing provider contributes
   /// an empty result rather than propagating an exception.
   static Future<DesignKnowledge> analyze(
     DesignContext context, {
     List<KnowledgeProvider>? providers,
   }) async {
+    final stripped = RtlPreprocessor.stripComments(context.rtlSource);
+    final ctx = stripped == context.rtlSource
+        ? context
+        : DesignContext(
+            rtlSource: stripped,
+            parsedIr:  context.parsedIr,
+            topModule: context.topModule,
+            config:    context.config,
+          );
+
     final ps      = providers ?? _defaultProviders;
-    final futures = ps.map((p) => _safeAnalyze(p, context));
+    final futures = ps.map((p) => _safeAnalyze(p, ctx));
     final results = await Future.wait(futures);
     return _merge(results);
   }

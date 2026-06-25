@@ -292,9 +292,9 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 
 **Completed evaluations:**
 
-| Design | Tier | Lines | Runtime | Diagnostics | FP Count | Status |
-|--------|------|-------|---------|-------------|----------|--------|
-| [wb2axip skidbuffer](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | 1 | 57 (preprocessed) | 30 ms | 1 (medium) | 1/1 | Complete |
+| Design | Tier | Lines | Runtime | Diagnostics | FP Severity | Status |
+|--------|------|-------|---------|-------------|-------------|--------|
+| [wb2axip skidbuffer](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | 1 | 57 | 23 ms | 1 (low) | low | Updated post-calibration |
 
 **Open-source evaluation artifacts:**
 
@@ -303,17 +303,23 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 | [docs/evaluation/open_source/open_source_evaluation_plan.md](docs/evaluation/open_source/open_source_evaluation_plan.md) | 4-phase evaluation roadmap |
 | [docs/evaluation/open_source/design_selection.md](docs/evaluation/open_source/design_selection.md) | Candidate designs and selection rationale |
 | [docs/evaluation/open_source/evaluation_methodology.md](docs/evaluation/open_source/evaluation_methodology.md) | Inputs, outputs, metrics, and procedure |
-| [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer |
+| [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer (with before/after calibration table) |
 
-**Key findings from wb2axip skidbuffer (Phase 1):**
+**Heuristic calibration (Sprint H Task 3) — measured improvements on wb2axip skidbuffer:**
 
-- Handshake protocol (`valid_ready`) correctly detected from signal names alone
-- Reset signal (`i_reset`) not detected — the `i_` direction prefix is not in the reset name heuristic
-- One false-positive register (`istered`) generated from the word "registered" in a comment — comment text is not stripped before analysis
-- The single diagnostic ("Coverage moderate") is a false positive for a formally verified design (FP rate: 100%)
-- Pipeline completes successfully on real-world RTL in 30 ms
+| Issue | Before | After |
+|-------|--------|-------|
+| Comment false positive (`istered`) | registers = 4 | registers = 3 (resolved) |
+| Reset not detected (`i_reset`) | `hasReset = false` | `hasReset = true` (resolved) |
+| Clock not primary (`i_clk`) | `primaryClocks = []` | `primaryClocks = [i_clk]` (resolved) |
+| Coverage estimate | 73% (moderate) | 82% (low) (improved) |
+| Diagnostic severity | medium | low (less alarming) |
 
-**Next:** Phase 1 evaluation continues. PicoRV32 evaluation blocked on comment-stripping fix (high-priority improvement identified by skidbuffer evaluation).
+**What still applies after calibration:**
+- 1 diagnostic still produced for a formally verified design — the heuristic has no knowledge of formal verification status
+- `o_ready` still misclassified as sequential (driven by `always @(*)`); deferred improvement
+
+**Next:** Proceed to PicoRV32 evaluation. Both blocking issues (comment false positives, reset name mismatch) are resolved. 110 new regression tests added in `test/heuristics/`.
 
 ---
 

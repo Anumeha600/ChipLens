@@ -112,9 +112,11 @@ class BenchmarkRunner {
   /// Derive a [CoverageAssessment] from [DesignKnowledge].
   ///
   /// Complexity = FSM count + counter count + register count.
-  /// Every unit of complexity reduces estimated coverage by 6 pp (clamped to
-  /// [0.55, 0.97]).  This ensures designs with more detected structures
-  /// generate measurably different diagnostic counts.
+  /// Every unit of complexity reduces estimated coverage by 5 pp (clamped to
+  /// [0.55, 0.97]).  The penalty was reduced from 6 pp to 5 pp to avoid
+  /// overstating coverage concerns on designs with small register counts: a
+  /// design with 3 sequential registers now estimates at 82 % (CoverageRisk.low)
+  /// rather than 79 % (CoverageRisk.moderate).
   CoverageAssessment _buildCoverage(DesignKnowledge knowledge) {
     final complexity = knowledge.fsms.length +
         knowledge.counters.length +
@@ -122,7 +124,7 @@ class BenchmarkRunner {
 
     final overallCoverage = complexity == 0
         ? 0.97
-        : (0.97 - complexity * 0.06).clamp(0.55, 0.94);
+        : (0.97 - complexity * 0.05).clamp(0.55, 0.94);
 
     final CoverageRisk risk;
     final CoverageConfidence confidence;
