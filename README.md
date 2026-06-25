@@ -9,7 +9,7 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-2187%2B-success)
+![Tests](https://img.shields.io/badge/tests-2514%2B-success)
 
 </p>
 
@@ -37,7 +37,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 - Deterministic execution pipeline
 - Benchmark harness with reproducible results
 - Case studies with honest evaluation
-- **2187+ automated tests**
+- **2514+ automated tests**
 - **0 failing tests**
 - Active research and development
 
@@ -51,7 +51,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 | Development | Active |
 | Platform | Flutter + Dart |
 | License | MIT |
-| Automated Tests | **2187+ Passing** |
+| Automated Tests | **2514+ Passing** |
 | Test Failures | **0** |
 | Architecture | Layered & Modular |
 | Verification Pipeline | Complete |
@@ -296,6 +296,7 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 |--------|------|-------|---------|-------------|-------------|--------|
 | [wb2axip skidbuffer](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | 1 | 57 | 23 ms | 1 (low) | low | Updated post-calibration |
 | [PicoRV32 register file](docs/evaluation/open_source/picorv32_module_evaluation.md) | 1 | 16 | 32 ms | 1 (low) | low | Updated post-parser-calibration |
+| [SERV ALU](docs/evaluation/open_source/serv_module_evaluation.md) | 1 | 88 | 30 ms | 1 (medium) | 0 | Updated post-Task-7 (6 regs, moderate) |
 
 **Open-source evaluation artifacts:**
 
@@ -306,6 +307,7 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 | [docs/evaluation/open_source/evaluation_methodology.md](docs/evaluation/open_source/evaluation_methodology.md) | Inputs, outputs, metrics, and procedure |
 | [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer (with before/after calibration table) |
 | [docs/evaluation/open_source/picorv32_module_evaluation.md](docs/evaluation/open_source/picorv32_module_evaluation.md) | Phase 1 evaluation: PicoRV32 register file — before/after parser calibration table |
+| [docs/evaluation/open_source/serv_module_evaluation.md](docs/evaluation/open_source/serv_module_evaluation.md) | Phase 1 evaluation: SERV ALU — cross-project generalization validation; parameterized-width false negative |
 
 **Heuristic calibration (Sprint H Task 3) — measured improvements on wb2axip skidbuffer:**
 
@@ -344,7 +346,29 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 
 100 new regression tests added in `test/parser_regressions/` (keyword_boundary, memory_array, width_inference, picorv32_regression, fsm_counter_keyword_boundary). 2397 total tests pass.
 
-**Next:** Proceed to main `picorv32` module evaluation. All parser bugs found in the register file module are fixed and regression-tested.
+**Cross-project generalization (Sprint H Task 6 — SERV ALU validation):**
+
+| Metric | wb2axip | PicoRV32 regs | SERV ALU |
+|--------|---------|--------------|----------|
+| False positives | 0 | 0 | **0** — keyword fix generalizes |
+| False negatives | 0 | 0 | **1** (`add_cy_r` — parameterized width) |
+| `CoverageRisk` | low | low | low |
+| New parser issue | — | `\breg` prefix | none (Task 7 fixed prior FNs) |
+
+Parser improvements from wb2axip and PicoRV32 generalize: zero false positives across all three designs. SERV revealed a limitation (parameterized-width FN) that was fixed in Task 7.
+
+**Parameterized RTL support (Sprint H Task 7) — four fixes applied to SERV:**
+
+| Priority | Fix | SERV impact |
+|----------|-----|-------------|
+| P1 — Symbolic reg width | `reg [B:0] add_cy_r` now detected (widthIsKnown=false) | `add_cy_r` was silently dropped |
+| P2 — Symbolic port/wire width | `output wire [B:0] o_rd` widthIsKnown tracked | `o_rd`, `result_add` now widthIsKnown=false |
+| P2 — `output wire [N:M]` | wire qualifier no longer consumed as signal name | Numeric port widths inferred correctly |
+| P4 — Concatenation assign | `{add_cy, result_add} = …` LHS extracted | `add_cy`, `result_add` now detected |
+
+117 new tests in `test/parameterized_rtl/` (registers, ports, memories, concatenation, SERV). 2514 total tests pass. SERV post-Task-7: 6 registers, complexity=6, 67% coverage, moderate risk.
+
+**Next:** Proceed to Ibex evaluation — parameterized RTL is no longer a blind spot.
 
 ---
 

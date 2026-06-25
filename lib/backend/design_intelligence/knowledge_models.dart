@@ -132,6 +132,8 @@ class RegisterInfo {
   final String name;
 
   /// Declared bit-width of each element (1 for single-bit signals).
+  /// When `widthIsKnown` is false this defaults to 1 — actual width is
+  /// determined by a module parameter and cannot be evaluated statically.
   final int width;
 
   /// Driven from a clocked `always @(posedge ...)` block.
@@ -143,8 +145,16 @@ class RegisterInfo {
   /// True when the declaration is a memory array (`reg [W:0] name [D:0]`).
   final bool isMemoryArray;
 
-  /// Number of entries in the memory array; 0 for scalar registers.
+  /// Number of entries in the memory array; 0 for scalars or unknown depth.
   final int depth;
+
+  /// False when the packed width comes from a symbolic parameter expression
+  /// (e.g. `[B:0]`, `[WIDTH-1:0]`).  Width is reported as 1 in those cases.
+  final bool widthIsKnown;
+
+  /// False when the depth dimension comes from a symbolic parameter expression
+  /// (e.g. `[DEPTH-1:0]`).  Depth is reported as 0 in those cases.
+  final bool depthIsKnown;
 
   const RegisterInfo({
     required this.name,
@@ -153,13 +163,19 @@ class RegisterInfo {
     this.isCombinational = false,
     this.isMemoryArray   = false,
     this.depth           = 0,
+    this.widthIsKnown    = true,
+    this.depthIsKnown    = true,
   });
 
   @override
   String toString() {
-    final kind = isSequential ? 'sequential' : 'combinational';
-    final size = isMemoryArray ? '$depth×${width}b' : '${width}b';
-    return 'RegisterInfo($name, $size, $kind)';
+    final kind     = isSequential ? 'sequential' : 'combinational';
+    final widthStr = widthIsKnown ? '${width}b' : '?b';
+    if (isMemoryArray) {
+      final depthStr = depthIsKnown ? '$depth' : '?';
+      return 'RegisterInfo($name, $depthStr×$widthStr, $kind)';
+    }
+    return 'RegisterInfo($name, $widthStr, $kind)';
   }
 }
 

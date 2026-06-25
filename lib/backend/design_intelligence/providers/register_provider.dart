@@ -12,7 +12,8 @@ import '../knowledge_result.dart';
 /// sequential unless it also appears as an `assign` target.
 ///
 /// **Combinational** — signals that appear on the left-hand side of
-/// continuous `assign` statements.
+/// continuous `assign` statements, including concatenation assigns
+/// (`assign {a, b} = …`).
 ///
 /// Note: this is a structural heuristic.  Signals shared with other providers
 /// (state registers, counters) are not filtered out here — consumers can apply
@@ -25,11 +26,21 @@ class RegisterProvider implements KnowledgeProvider {
 
   // ── Regex ────────────────────────────────────────────────────────────────
 
-  // All reg declarations: optional packed width, identifier, optional depth.
-  // (?!\w) ensures the 'reg' keyword is not matched as a prefix of identifiers
-  // like 'regs', 'register', 'reg_data', etc.
+  // All reg declarations.  Capture groups:
+  //   1: numeric packed-width high bit  — null when no numeric width bracket
+  //   2: symbolic packed-width expr     — non-null for e.g. [B:0], [WIDTH-1:0]
+  //   3: identifier name
+  //   4: numeric depth high index       — null when no numeric depth bracket
+  //   5: numeric depth low index        — null when no numeric depth bracket
+  //   6: symbolic depth expr            — non-null for e.g. [DEPTH-1:0]
+  //
+  // (?!\w) prevents matching 'reg' as a prefix inside longer identifiers
+  // such as 'regs', 'register', 'reg_data', etc.
   static final _regDeclRe = RegExp(
-    r'\breg(?!\w)\s*(?:\[(\d+):\d+\])?\s*(\w+)\s*(?:\[(\d+):(\d+)\])?',
+    r'\breg(?!\w)\s*'
+    r'(?:\[(\d+):\d+\]|\[([^\]]*)\])?\s*'
+    r'(\w+)\s*'
+    r'(?:\[(\d+):(\d+)\]|\[([^\]]*)\])?',
     caseSensitive: false,
   );
 
@@ -39,6 +50,15 @@ class RegisterProvider implements KnowledgeProvider {
     caseSensitive: false,
   );
 
+  // assign {a, b, …} = …  — concatenation assign
+  static final _assignConcatRe = RegExp(
+    r'\bassign\s+\{([^}]+)\}\s*=',
+    caseSensitive: false,
+  );
+
+  // Identifier (starting with letter/underscore) for concat content extraction
+  static final _identInConcatRe = RegExp(r'\b([a-zA-Z_]\w*)\b');
+
   // always @(posedge …) → the module has a clocked domain
   static final _posedgeBlockRe = RegExp(
     r'\balways\s*@\s*\(\s*posedge',
@@ -46,11 +66,13 @@ class RegisterProvider implements KnowledgeProvider {
   );
 
   // Port, wire, and logic declarations — used to infer widths for assign
-  // targets that have no reg declaration.
-  // Matches: (input|output|inout|wire|logic) [reg] [N:M] name
+  // targets that have no reg declaration.  Capture groups:
+  //   1: numeric high bit  — null when no numeric bracket
+  //   2: symbolic expr     — non-null for e.g. [B:0], [WIDTH-1:0]
+  //   3: signal name
   static final _widthDeclRe = RegExp(
-    r'\b(?:input|output|inout|wire|logic)\s+(?:reg\s+)?'
-    r'(?:\[(\d+):\d+\])?\s*(\w+)',
+    r'\b(?:input|output|inout|wire|logic)\s+(?:(?:wire|reg)\s+)?'
+    r'(?:\[(\d+):\d+\]|\[([^\]]*)\])?\s*(\w+)',
     caseSensitive: false,
   );
 
@@ -64,38 +86,58 @@ class RegisterProvider implements KnowledgeProvider {
 
     final hasSeqBlock = _posedgeBlockRe.hasMatch(rtl);
 
-    // Build width map from port/wire/logic declarations for assign-target
-    // width inference.  Only entries with an explicit [N:M] are stored;
-    // 1-bit signals fall back to the default width of 1.
-    final declaredWidths = <String, int>{};
+    // Build width map and symbolic-width set from port/wire/logic declarations.
+    // Only numeric brackets are stored in declaredWidths; symbolic bracket
+    // declarations are tracked in symbolicallyWide so widthIsKnown can be set
+    // correctly on assign-target signals.
+    final declaredWidths   = <String, int>{};
+    final symbolicallyWide = <String>{};
     for (final m in _widthDeclRe.allMatches(rtl)) {
-      final highBit = m.group(1);
-      if (highBit != null) {
-        declaredWidths[m.group(2)!] = int.parse(highBit) + 1;
+      final numHighBit = m.group(1);
+      final symExpr    = m.group(2);
+      final sigName    = m.group(3)!;
+      if (numHighBit != null) {
+        declaredWidths[sigName] = int.parse(numHighBit) + 1;
+      } else if (symExpr != null) {
+        symbolicallyWide.add(sigName);
       }
     }
 
-    // Collect assign targets — these are combinational regardless of type.
+    // Collect simple assign targets (combinational signals).
     final combNames = <String>{};
     for (final m in _assignTargetRe.allMatches(rtl)) {
       combNames.add(m.group(1)!);
     }
 
+    // Collect concatenation assign targets, e.g. assign {carry, result} = …
+    for (final m in _assignConcatRe.allMatches(rtl)) {
+      for (final id in _identInConcatRe.allMatches(m.group(1)!)) {
+        combNames.add(id.group(1)!);
+      }
+    }
+
     // Walk all reg declarations.
     for (final m in _regDeclRe.allMatches(rtl)) {
-      final highBit   = m.group(1);
-      final name      = m.group(2)!;
-      final depthHigh = m.group(3);
-      final depthLow  = m.group(4);
+      final numHighBit = m.group(1);
+      final symWidth   = m.group(2);
+      final name       = m.group(3)!;
+      final depthHigh  = m.group(4);
+      final depthLow   = m.group(5);
+      final symDepth   = m.group(6);
       if (!seen.add(name)) continue;
 
-      final width   = highBit != null ? int.parse(highBit) + 1 : 1;
-      final isArray = depthHigh != null && depthLow != null;
-      final depth   = isArray
+      final width        = numHighBit != null ? int.parse(numHighBit) + 1 : 1;
+      // widthIsKnown: true for numeric bracket or no bracket (1-bit scalar);
+      //               false only when a symbolic parameter expression is present.
+      final widthIsKnown = numHighBit != null || symWidth == null;
+      final isArray      = depthHigh != null || symDepth != null;
+      // depthIsKnown: false only when a symbolic depth expression is present.
+      final depthIsKnown = symDepth == null;
+      final depth        = (depthHigh != null && depthLow != null)
           ? (int.parse(depthHigh) - int.parse(depthLow)).abs() + 1
           : 0;
-      final isComb  = combNames.contains(name);
-      final isSeq   = hasSeqBlock && !isComb;
+      final isComb = combNames.contains(name);
+      final isSeq  = hasSeqBlock && !isComb;
 
       registers.add(RegisterInfo(
         name:            name,
@@ -104,11 +146,14 @@ class RegisterProvider implements KnowledgeProvider {
         isCombinational: isComb,
         isMemoryArray:   isArray,
         depth:           depth,
+        widthIsKnown:    widthIsKnown,
+        depthIsKnown:    depthIsKnown,
       ));
     }
 
     // Emit combinational-only signals from assign that are not declared as reg.
-    // Use declared port/wire width when available; default to 1.
+    // Use declared port/wire width when available.  For symbolically-typed
+    // signals, width defaults to 1 and widthIsKnown is false.
     for (final name in combNames) {
       if (seen.contains(name)) continue;
       registers.add(RegisterInfo(
@@ -116,6 +161,7 @@ class RegisterProvider implements KnowledgeProvider {
         width:           declaredWidths[name] ?? 1,
         isSequential:    false,
         isCombinational: true,
+        widthIsKnown:    !symbolicallyWide.contains(name),
       ));
     }
 
