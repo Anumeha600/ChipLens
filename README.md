@@ -4,7 +4,7 @@
 
 <p align="center">
 
-![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+![Version](https://img.shields.io/badge/version-v1.5.0-blue)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
@@ -47,7 +47,7 @@ The project combines semantic analysis, deterministic property synthesis, explai
 
 | Item | Status |
 |------|--------|
-| Current Release | **v1.0.0 – Core Reasoning Platform** |
+| Current Release | **v1.5.0 – Core Reasoning Platform** |
 | Development | Active |
 | Platform | Flutter + Dart |
 | License | MIT |
@@ -392,7 +392,7 @@ The Verification Orchestrator serves as the coordination layer that assembles th
 ---
 ## Project Status
 
-ChipLens has reached **v1.0.0 — Core Reasoning Platform**.
+ChipLens has reached **v1.5.0 — Core Reasoning Platform**.
 
 The implementation now provides a complete end-to-end verification reasoning pipeline, spanning RTL understanding through verification orchestration. The current focus has shifted from building core frameworks to refining the platform, improving usability, benchmarking verification workflows, and conducting experimental evaluation.
 
