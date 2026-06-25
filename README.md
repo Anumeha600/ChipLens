@@ -402,10 +402,10 @@ The implementation now provides a complete end-to-end verification reasoning pip
 
 | Metric | Value |
 |---------|------:|
-| Current Version | **v1.0.0** |
+| Current Version | **v1.5.0** |
 | Development Status | Active |
 | Core Reasoning Frameworks | 14 |
-| Automated Tests | **2187+ Passing Tests** |
+| Automated Tests | **2514+ Passing Tests** |
 | Test Failures | **0** |
 | Layered Architecture | ✅ |
 | Deterministic Pipeline | ✅ |
