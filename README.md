@@ -308,6 +308,24 @@ ChipLens is being evaluated against external open-source RTL designs that were n
 | [docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md](docs/evaluation/open_source/wb2axip_skidbuffer_evaluation.md) | Phase 1 evaluation: formally verified AXI flow-control buffer (with before/after calibration table) |
 | [docs/evaluation/open_source/picorv32_module_evaluation.md](docs/evaluation/open_source/picorv32_module_evaluation.md) | Phase 1 evaluation: PicoRV32 register file — before/after parser calibration table |
 | [docs/evaluation/open_source/serv_module_evaluation.md](docs/evaluation/open_source/serv_module_evaluation.md) | Phase 1 evaluation: SERV ALU — cross-project generalization validation; parameterized-width false negative |
+| [docs/evaluation/open_source/ibex_module_evaluation.md](docs/evaluation/open_source/ibex_module_evaluation.md) | Tier 3 evaluation: Ibex register file (SystemVerilog) — 3 SV defects found and fixed; logic array limitation documented |
+
+**Research methodology (Sprint I Task 1):**
+
+| Document | Description |
+|----------|-------------|
+| [docs/research/verification_productivity_methodology.md](docs/research/verification_productivity_methodology.md) | Research question, productivity model, traditional vs. ChipLens workflow |
+| [docs/research/verification_metrics.md](docs/research/verification_metrics.md) | Measurable metrics for design understanding, property generation, planning, diagnostics, workflow |
+| [docs/research/threats_to_validity.md](docs/research/threats_to_validity.md) | Internal, external, construct, and conclusion validity threats |
+| [docs/research/experimental_protocol.md](docs/research/experimental_protocol.md) | Ground truth protocol, measurement procedure, future experiment designs |
+
+**Baseline productivity study (Sprint I Task 2):**
+
+| Document | Description |
+|----------|-------------|
+| [docs/research/results/baseline_productivity_results.md](docs/research/results/baseline_productivity_results.md) | Full pipeline measurements for all 4 designs: registers, clocks, resets, properties, tasks, diagnostics, runtime |
+| [docs/research/results/design_metrics_summary.md](docs/research/results/design_metrics_summary.md) | Aggregate tables (avg/min/max) for all DU/PG/PL/DG/RP/WF metrics |
+| [docs/research/results/framework_output_inventory.md](docs/research/results/framework_output_inventory.md) | Per-framework: input, output, immutable objects produced, productivity contribution |
 
 **Heuristic calibration (Sprint H Task 3) — measured improvements on wb2axip skidbuffer:**
 
