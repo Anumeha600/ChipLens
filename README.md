@@ -2,43 +2,28 @@
 
 ### Compiler-Inspired RTL Engineering Platform
 
+> **Build • Understand • Analyze • Verify RTL Designs**
+
 <p align="center">
-
-**Build • Understand • Analyze • Verify RTL Designs**
-
-*An open-source platform for language-aware RTL engineering, semantic analysis, and verification.*
-
+  <img src="docs/images/workbench.png" width="95%">
 </p>
 
----
-
 <p align="center">
 
-<!-- Replace with actual screenshot -->
-
-<img src="docs/images/workbench.png" width="95%">
-
-</p>
-
----
-
-<p align="center">
-
-![Platform](https://img.shields.io/badge/Platform-Desktop%20Engineering-blue)
-
-![Language](https://img.shields.io/badge/Language-Dart%203.x-0175C2)
-
-![Framework](https://img.shields.io/badge/Framework-Flutter%203.x-02569B)
-
-![Architecture](https://img.shields.io/badge/Architecture-Compiler--Inspired-success)
-
-![Verification](https://img.shields.io/badge/Verification-Formal%20Ready-orange)
-
-![Tests](https://img.shields.io/badge/Tests-5289%2B-brightgreen)
-
+![Platform](https://img.shields.io/badge/Desktop-Windows%20%7C%20Linux%20%7C%20macOS-blue)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
+![Tests](https://img.shields.io/badge/Tests-5289+-brightgreen)
+![Architecture](https://img.shields.io/badge/Compiler--Inspired-success)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 </p>
+
+---
+
+ChipLens is an open-source RTL engineering platform that applies compiler-inspired architecture to hardware design.
+
+Instead of treating RTL verification as a collection of independent tools, ChipLens builds a shared language infrastructure—Parser → AST → Symbol Table → Semantic Model—that powers navigation, diagnostics, verification, and engineering analysis from a single semantic understanding of the design.
 
 ---
 
