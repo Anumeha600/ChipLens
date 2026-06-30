@@ -1,754 +1,745 @@
+<div align="center">
+
 # ChipLens
 
-# Compiler-Inspired Semantic RTL Verification Research Platform
+### An Extensible RTL Engineering Workbench and Compiler-Inspired Verification Platform
 
-<p align="center">
+<p>
 
-[![Version](https://img.shields.io/badge/version-v2.0.0--dev-blue.svg)]()
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B.svg?logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2.svg?logo=dart)](https://dart.dev)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-3196%2B-success.svg)]()
+A desktop-first engineering environment for **Register Transfer Level (RTL)** development, analysis, verification, and research.
+
+Built with **Flutter** and **Dart**, ChipLens combines a modern IDE workspace with a modular compiler-inspired reasoning engine for digital hardware design.
 
 </p>
 
-ChipLens is an open-source research platform that applies **compiler-inspired software engineering principles** to **Register Transfer Level (RTL) verification**.
+---
 
-Rather than viewing RTL verification as a sequence of disconnected tool invocations, ChipLens models verification as a structured reasoning pipeline. Each stage incrementally constructs semantic knowledge about an RTL design before producing verification artifacts, diagnostics, coverage intelligence, and explainable verification results.
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Web-blue)
 
-The project separates **reasoning** from **verification execution**. ChipLens performs semantic analysis, property synthesis, verification planning, diagnostics, explainability, repair planning, and orchestration while remaining independent of any single formal verification engine.
+![Language](https://img.shields.io/badge/Language-Dart%203-blue)
 
-The result is a deterministic, modular, and explainable verification workflow designed for research into next-generation hardware verification methodologies.
+![Framework](https://img.shields.io/badge/Framework-Flutter-02569B)
+
+![License](https://img.shields.io/badge/License-MIT-success)
+
+![Tests](https://img.shields.io/badge/Tests-4429%20Passing-success)
+
+![Failures](https://img.shields.io/badge/Failures-0-success)
+
+![Status](https://img.shields.io/badge/Status-Active%20Development-orange)
+
+</div>
 
 ---
 
-# Highlights
+# Overview
 
-- Compiler-inspired layered verification architecture
-- Semantic RTL analysis and evidence extraction
-- Deterministic property synthesis
-- Explainable verification decisions
-- Verification planning
-- Coverage intelligence
-- Counterexample analysis
-- Diagnostics intelligence
-- Dependency-aware repair planning
-- Verification orchestration
-- Desktop-first Engineering Workbench
-- Immutable intermediate representations
-- Deterministic execution pipeline
-- Empirical evaluation against open-source RTL designs
-- Benchmark harness with reproducible results
-- 3196+ automated tests
-- Zero failing tests
-- Active research and development
+ChipLens is an open-source engineering platform that explores a modern approach to **RTL development, verification, and design understanding**.
+
+Rather than functioning as a traditional text editor or a single-purpose verification utility, ChipLens is designed as an integrated engineering workbench where RTL code, structural analysis, verification planning, diagnostics, and future AI-assisted engineering workflows coexist within a unified desktop environment.
+
+The project combines two complementary directions:
+
+- **A professional desktop RTL engineering workbench**
+- **A compiler-inspired semantic reasoning framework for hardware verification**
+
+These two layers are intentionally independent.
+
+The workbench focuses on developer productivity and engineering workflows, while the reasoning engine focuses on deterministic semantic analysis, verification planning, explainability, diagnostics, and research into next-generation RTL verification methodologies.
 
 ---
 
-# Current Status
+# Vision
 
-| Item | Status |
-|------|--------|
-| Current Version | **v2.0.0-dev** |
-| Development Status | Active |
-| Platform | Flutter + Dart |
-| License | MIT |
-| Core Reasoning Frameworks | 14 |
-| Property Providers | 8 |
-| Engineering Workbench | Desktop-first |
-| Workspace Explorer | Complete |
-| Verification Workspace | In Progress |
-| Automated Tests | **3196+ Passing** |
-| Test Failures | **0** |
-| Analyzer Errors | **0** |
-| Research Evaluation | Complete |
-| Open-source RTL Validation | Complete |
+ChipLens aims to become a modern engineering platform for digital hardware development.
+
+The long-term objective is **not** to replace established EDA tools such as Cadence, Synopsys, Siemens EDA, Vivado, Quartus, or SymbiYosys.
+
+Instead, ChipLens investigates how modern software engineering principles—including modular architectures, compiler design, immutable data models, and AI-assisted workflows—can improve the overall RTL engineering experience.
+
+In the same way that modern IDEs transformed software development, ChipLens explores how integrated tooling can improve hardware engineering.
 
 ---
-
-# Table of Contents
-
-- [Why ChipLens?](#why-chiplens)
-- [Research Motivation](#research-motivation)
-- [Engineering Philosophy](#engineering-philosophy)
-- [Why Flutter and Dart?](#why-flutter-and-dart)
-- [Architectural Scope](#architectural-scope)
-- [System Architecture](#system-architecture)
-- [Verification Pipeline](#verification-pipeline)
-- [Core Frameworks](#core-frameworks)
-- [Property Synthesis Architecture](#property-synthesis-architecture)
-- [Engineering Workbench](#engineering-workbench)
-- [Evaluation](#evaluation)
-- [Open-Source RTL Validation](#open-source-rtl-validation)
-- [Technology Stack](#technology-stack)
-- [Repository Structure](#repository-structure)
-- [Getting Started](#getting-started)
-- [Current Limitations](#current-limitations)
-- [Roadmap](#roadmap)
-- [Research Vision](#research-vision)
-- [Contributing](#contributing)
-- [Citation](#citation)
-- [License](#license)
 
 # Why ChipLens?
 
-Modern RTL verification relies on a rich ecosystem of simulation, linting, static analysis, and formal verification tools. While these tools are individually powerful, the reasoning that connects them often remains fragmented, manual, and difficult to reproduce.
+Modern RTL development often spans multiple disconnected tools.
 
-Verification engineers are frequently responsible for answering questions such as:
+Engineers routinely switch between:
 
-- Which properties should be verified?
-- Why were those properties selected?
-- What evidence supports a generated assertion?
-- Which portions of the design remain under-verified?
-- How should verification failures be prioritized?
-- What repair activities should be performed next?
+- Source code editors
+- Simulation environments
+- Formal verification tools
+- Waveform viewers
+- Linting tools
+- Coverage reports
+- Documentation
+- Build systems
+- Version control
 
-Traditional verification flows provide excellent execution engines but comparatively little structured reasoning before or after verification.
+While these tools are individually powerful, the engineering workflow surrounding them is often fragmented.
 
-ChipLens investigates a different approach.
+ChipLens explores a different approach.
 
-Rather than treating verification as a collection of independent tools, ChipLens models verification as a deterministic reasoning pipeline inspired by modern compiler infrastructures.
+Instead of treating RTL development as a sequence of unrelated applications, ChipLens provides a unified engineering environment where project navigation, source editing, semantic analysis, diagnostics, verification planning, and future AI-assisted workflows can coexist within a single workspace.
 
-Every framework performs a single semantic transformation, incrementally enriching the understanding of an RTL design before producing verification artifacts, diagnostics, explainability information, coverage intelligence, repair recommendations, and verification reports.
-
-The objective is not to replace established formal verification engines, but to organize the reasoning surrounding them.
-
----
-
-# Research Motivation
-
-ChipLens originated from a simple research question:
-
-> **Can compiler-inspired semantic reasoning improve the transparency, reproducibility, and organization of RTL verification workflows?**
-
-Modern compiler infrastructures have demonstrated that complex software analysis becomes significantly easier when computation is decomposed into independent semantic passes operating over immutable intermediate representations.
-
-Hardware verification rarely adopts this architectural philosophy.
-
-Instead, many verification flows consist of loosely connected scripts, isolated tools, manually maintained property sets, and independently interpreted results.
-
-ChipLens investigates whether these software engineering principles can improve RTL verification by introducing:
-
-- Layered semantic analysis
-- Immutable intermediate representations
-- Deterministic transformations
-- Structured evidence propagation
-- Explainable reasoning
-- Modular verification stages
-- Reproducible verification workflows
-
-Rather than focusing exclusively on proving properties, ChipLens focuses on understanding the verification process itself.
+The long-term goal is to reduce engineering friction while improving understanding, reproducibility, and productivity.
 
 ---
 
-# Engineering Philosophy
+# Current Project Status
 
-Every architectural decision within ChipLens follows a small set of engineering principles that remain consistent throughout the entire platform.
+ChipLens is under active development.
 
-## Layered Reasoning
+The project currently consists of two major subsystems.
 
-Verification is decomposed into independent reasoning stages.
+## 1. Desktop Engineering Workbench
 
-Each framework performs one semantic transformation before passing immutable outputs to the next framework.
+The workbench provides the user-facing engineering environment.
 
-No framework performs multiple unrelated responsibilities.
+Current capabilities include:
+
+- Desktop-first multi-panel workspace
+- RTL project explorer
+- Read-only RTL editor
+- Multiple document tabs
+- RTL tokenizer
+- Syntax highlighting foundation
+- Outline navigation
+- Symbol extraction
+- Command palette
+- Global search
+- Keyboard shortcuts
+- Problems panel
+- Output panel
+- Status bar
+- Workspace controller
+- Responsive desktop/web layouts
+- Immutable workspace state
+- Extensive automated UI testing
 
 ---
 
-## Single Responsibility
+## 2. Compiler-Inspired Verification Framework
 
-Every framework owns one clearly defined task.
+The backend reasoning engine focuses on deterministic semantic reasoning rather than proof execution.
+
+Implemented framework modules include:
+
+- Design Intelligence
+- Semantic Evidence
+- Property Synthesis
+- Property Ranking
+- Property Emission
+- Explainability
+- Verification Planning
+- Coverage Intelligence
+- Counterexample Analysis
+- Diagnostics Intelligence
+- Repair Planning
+- Verification Orchestrator
+
+The reasoning engine is intentionally backend-independent and designed to integrate with external verification engines rather than replace them.
+
+---
+
+# Current Engineering Metrics
+
+| Metric | Current |
+|----------|---------|
+| Automated Tests | **4,429 Passing** |
+| Test Failures | **0** |
+| Desktop Workbench | ✅ |
+| RTL Workspace | ✅ |
+| Project System | ✅ |
+| Multi-Document Editor | ✅ |
+| RTL Tokenizer | ✅ |
+| Outline Navigation | ✅ |
+| Command Palette | ✅ |
+| Workspace Explorer | ✅ |
+| Backend Frameworks | **14** |
+| Property Providers | **8** |
+| Open-Source RTL Validation | ✅ |
+| Benchmark Framework | ✅ |
+| License | MIT |
+
+---
+
+# Design Philosophy
+
+ChipLens is guided by a small set of engineering principles that influence every architectural decision.
+
+## Engineering Before Appearance
+
+The workbench is designed to support long engineering sessions rather than showcase visual effects.
+
+Functionality always takes precedence over decoration.
+
+---
+
+## Desktop First
+
+ChipLens is designed primarily for desktop engineering workflows.
+
+Keyboard navigation, information density, panel management, and workspace efficiency take priority over mobile-oriented interaction patterns.
+
+---
+
+## Modular Architecture
+
+Every subsystem owns a clearly defined responsibility.
 
 Examples include:
 
-- Semantic Evidence extraction
-- Property Synthesis
-- Property Ranking
+- Workspace Engine
+- RTL Language Engine
+- Verification Framework
+- Project System
+- Diagnostics
 - Explainability
-- Coverage Intelligence
-- Diagnostics Intelligence
-- Repair Planning
+- Future AI Services
 
-This separation reduces coupling while allowing individual frameworks to evolve independently.
+Each subsystem evolves independently through immutable interfaces.
 
 ---
 
-## Deterministic Execution
+## Deterministic Reasoning
 
-Identical RTL inputs always produce identical reasoning outputs.
+The verification engine emphasizes deterministic execution.
 
-ChipLens intentionally avoids hidden mutable state and non-deterministic execution whenever possible.
+Identical RTL inputs should always produce identical semantic outputs whenever possible.
 
-Deterministic execution enables:
-
-- reproducible experiments
-- stable benchmark results
-- predictable verification artifacts
-- reliable regression testing
-
----
-
-## Immutability
-
-Communication between frameworks occurs exclusively through immutable value objects.
-
-This approach:
-
-- eliminates unintended side effects
-- simplifies testing
-- improves reasoning reproducibility
-- reduces architectural complexity
-
----
-
-## Explainability
-
-Verification artifacts should never appear without supporting evidence.
-
-Whenever ChipLens generates a verification property, diagnostic, or recommendation, supporting semantic evidence accompanies that decision whenever possible.
-
-The objective is to make verification understandable rather than opaque.
-
----
-
-## Modularity
-
-Every framework can evolve independently.
-
-New reasoning stages can be introduced without modifying unrelated components.
-
-Likewise, individual frameworks may be replaced or experimentally evaluated while preserving the surrounding architecture.
+This simplifies testing, reproducibility, benchmarking, and future research.
 
 ---
 
 ## Extensibility
 
-ChipLens is designed as a long-term research platform rather than a fixed verification tool.
+ChipLens is designed as a long-term research platform.
 
-Future research directions include:
-
-- semantic analysis
-- verification planning
-- explainable verification
-- AI-assisted verification
-- verification optimization
-- automated repair planning
-- engineering workbench extensions
-
-without requiring fundamental architectural redesign.
+Future capabilities—including language servers, verification engines, AI assistants, waveform analysis, and plugin systems—are intended to integrate without requiring architectural redesign.
 
 ---
 
-# Why Flutter and Dart?
+# Architecture
 
-ChipLens intentionally adopts an unconventional technology stack.
+ChipLens is organized into two largely independent layers:
 
-Electronic Design Automation tools have historically been implemented using languages such as C++, Python, Tcl, Java, and OCaml.
-
-ChipLens instead explores whether modern application engineering practices can simplify the development of research-grade verification software.
-
-Flutter provides:
-
-- cross-platform desktop support
-- web deployment
-- responsive engineering interfaces
-- modern rendering
-- rapid user interface development
-
-Dart provides:
-
-- strong static typing
-- immutable programming patterns
-- asynchronous execution
-- expressive value-oriented APIs
-- excellent testability
-
-These characteristics closely align with the architectural goals of ChipLens.
-
-The project deliberately separates semantic reasoning from graphical presentation.
-
-Verification frameworks remain independent of the user interface, allowing future command-line interfaces, web deployments, and alternative frontends without modifying the reasoning engine.
-
-Although unusual within Electronic Design Automation, this architecture enables a unified implementation across desktop and web environments while maintaining deterministic verification behavior.
-
----
-
-# Architectural Scope
-
-ChipLens is **not** a replacement for formal verification engines.
-
-Instead, it operates as an intelligent reasoning layer surrounding existing verification backends.
-
-Responsibilities currently implemented include:
-
-- RTL semantic analysis
-- evidence extraction
-- candidate property synthesis
-- deterministic property ranking
-- property emission
-- explainability
-- verification planning
-- coverage interpretation
-- counterexample analysis
-- diagnostics intelligence
-- repair planning
-- verification orchestration
-
-Execution of formal verification remains delegated to external engines such as SymbiYosys.
-
-This separation allows ChipLens to remain backend-independent while focusing on reasoning rather than proof execution.
-
-# System Architecture
-
-ChipLens follows a **compiler-inspired layered architecture** in which verification is decomposed into independent reasoning frameworks.
-
-Rather than combining parsing, property generation, diagnostics, planning, and reporting into a monolithic verification engine, ChipLens performs verification as a sequence of deterministic semantic transformations.
-
-Each framework receives immutable inputs, performs one well-defined responsibility, and produces immutable outputs consumed by subsequent frameworks.
-
-This architecture improves:
-
-- Modularity
-- Testability
-- Deterministic execution
-- Explainability
-- Reproducibility
-- Long-term extensibility
-
-Every framework is:
-
-- Independently testable
-- Deterministic
-- Side-effect free
-- Backend independent
-- Built around immutable value objects
-
----
-
-# Verification Pipeline
-
-The complete reasoning pipeline currently consists of fourteen major frameworks.
-
-```text
-RTL Source
-     │
-     ▼
-┌──────────────────────────────┐
-│ Design Intelligence          │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Semantic Evidence            │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Candidate Property Synthesis │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Property Ranking             │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Property Emitter             │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Explainability               │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Verification Planner         │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Formal Verification          │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Coverage Analyzer            │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Coverage Intelligence        │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Counterexample Analysis      │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Diagnostics Intelligence     │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Repair Planning              │
-└──────────────────────────────┘
-     │
-     ▼
-┌──────────────────────────────┐
-│ Verification Orchestrator    │
-└──────────────────────────────┘
-     │
-     ▼
-Verification Session
+```
+                        ┌──────────────────────────────┐
+                        │      ChipLens Platform       │
+                        └──────────────┬───────────────┘
+                                       │
+          ┌────────────────────────────┴────────────────────────────┐
+          │                                                         │
+          ▼                                                         ▼
+┌─────────────────────────────┐                  ┌─────────────────────────────┐
+│   Desktop Engineering IDE   │                  │ Compiler-Inspired Backend   │
+│                             │                  │                             │
+│ • Workspace                 │                  │ • Semantic Analysis         │
+│ • RTL Editor                │                  │ • Property Inference        │
+│ • Explorer                  │                  │ • Explainability            │
+│ • Outline                   │                  │ • Verification Planning     │
+│ • Diagnostics               │                  │ • Coverage Intelligence     │
+│ • Project System            │                  │ • Repair Planning           │
+│ • Future AI Workspace       │                  │ • Verification Orchestrator │
+└─────────────────────────────┘                  └─────────────────────────────┘
 ```
 
-Every framework contributes structured semantic knowledge to the overall verification process.
+The two layers intentionally evolve independently.
 
-Rather than duplicating information across stages, ChipLens progressively enriches the understanding of the RTL design until a complete verification session is produced.
+The engineering workbench focuses on developer productivity.
 
----
+The reasoning engine focuses on deterministic semantic reasoning.
 
-# Core Frameworks
-
-| Framework | Primary Responsibility |
-|------------|------------------------|
-| **Design Intelligence** | Extracts structural and behavioural information from RTL designs, including modules, signals, registers, clocks, resets, counters, memories, and finite state machines. |
-| **Semantic Evidence** | Converts structural information into immutable semantic evidence used throughout the reasoning pipeline. |
-| **Candidate Property Synthesis** | Generates deterministic candidate verification properties from semantic evidence using independent synthesis providers. |
-| **Property Ranking** | Prioritises candidate properties according to deterministic ranking policies before formal emission. |
-| **Property Emitter** | Converts ranked properties into backend-independent formal verification artifacts suitable for downstream verification engines. |
-| **Explainability** | Produces structured explanations describing why each property was generated and which semantic evidence contributed to that decision. |
-| **Verification Planner** | Organises generated properties into deterministic verification plans prior to execution. |
-| **Formal Verification** | Interfaces with external formal verification engines while remaining independent of any particular backend implementation. |
-| **Coverage Analyzer** | Collects structural verification coverage and execution statistics. |
-| **Coverage Intelligence** | Interprets coverage information, identifies verification gaps, and generates structured recommendations. |
-| **Counterexample Analysis** | Reconstructs structured summaries from failed verification traces for downstream reasoning. |
-| **Diagnostics Intelligence** | Correlates outputs from multiple reasoning frameworks to identify verification issues and likely root causes. |
-| **Repair Planning** | Converts diagnostics into dependency-aware repair recommendations without modifying RTL source code. |
-| **Verification Orchestrator** | Coordinates the complete verification workflow and assembles an immutable verification session representing the entire reasoning process. |
-
----
-
-# Property Synthesis Architecture
-
-Property synthesis is implemented as a modular provider pipeline.
-
-Rather than embedding all synthesis logic inside a single framework, ChipLens delegates candidate generation to independent providers, each responsible for a specific verification domain.
-
-Current providers include:
-
-| Provider | Responsibility |
-|-----------|----------------|
-| **Reset Property Provider** | Generates reset-related safety properties. |
-| **FSM Property Provider** | Produces properties describing finite-state machine behaviour. |
-| **Counter Property Provider** | Generates deterministic counter verification properties. |
-| **Handshake Property Provider** | Detects ready/valid style interfaces and synthesises communication safety properties. |
-| **Safety Property Provider** | Generates generic safety assertions from semantic evidence. |
-| **Memory Property Provider** | Produces conservative properties for memory arrays and memory interface signals. |
-| **Arithmetic Property Provider** | Synthesises safety properties for arithmetic datapaths, carry chains, comparators, and result signals. |
-| **Register Property Provider** | Generates safety properties for sequential registers not already covered by specialised providers. |
-
-Every provider:
-
-- operates independently,
-- receives immutable semantic inputs,
-- produces immutable property collections,
-- remains deterministic,
-- can be tested in isolation,
-- integrates without modifying the synthesis pipeline.
-
-This provider-based architecture enables new synthesis strategies to be introduced through composition rather than architectural modification.
+This separation allows future command-line tools, web interfaces, plugins, and research prototypes to reuse the same reasoning infrastructure without depending on a specific user interface.
 
 ---
 
 # Engineering Workbench
 
-ChipLens includes a **desktop-first Engineering Workbench** that exposes the reasoning pipeline through an IDE-inspired interface.
+The Engineering Workbench is the primary user interface of ChipLens.
 
-Unlike traditional EDA tools that present verification results as disconnected reports, the Engineering Workbench organises the complete verification workflow into reusable panels.
+Unlike a traditional dashboard application, the workbench is designed to become the central environment where RTL engineers spend the majority of their development time.
 
-Current implementation includes:
+Current architecture includes:
 
-- Desktop-first multi-panel architecture
-- Engineering Workbench framework
-- Immutable workbench state
-- Panel registry
-- Workspace Explorer
-- Responsive desktop/web layout
-- Toolbar
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Toolbar                                                                    │
+├────────────────────────────────────────────────────────────────────────────┤
+│ Sidebar │ Project Explorer │ RTL Editor │ Outline / Symbols / Properties   │
+├─────────┴──────────────────┴────────────┴──────────────────────────────────┤
+│ Problems │ Output │ Terminal │ Logs │ Analysis                             │
+├────────────────────────────────────────────────────────────────────────────┤
+│ Status Bar                                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+The workbench is built around immutable state models and independent panel controllers.
+
+Current capabilities include:
+
+- Multi-panel desktop workspace
+- Project explorer
+- RTL workspace
+- Multiple document management
+- Read-only RTL editor
+- Line numbering
+- RTL outline generation
+- Symbol extraction
+- Command palette
+- Global search
+- Keyboard shortcuts
+- Responsive desktop layout
 - Status bar
+- Problems panel
+- Output panel
+- Workspace controller
+- Modular panel architecture
 
-The Workspace Explorer organises projects by verification workflow rather than filesystem structure, providing logical access to:
+The workbench continues to evolve toward a fully featured RTL engineering environment.
 
-- RTL sources
-- Verification artifacts
-- Coverage analysis
-- Diagnostics
+---
+
+# Workspace Engine
+
+The Workspace Engine is responsible for the behavior of the desktop environment.
+
+Responsibilities include:
+
+- Project navigation
+- Document management
+- Multi-document tabs
+- Panel management
+- Workspace state
+- Layout management
+- Keyboard navigation
+- Command routing
+- Responsive layouts
+
+The Workspace Engine is intentionally separated from RTL analysis.
+
+This allows future language engines, plugins, and verification tools to integrate without modifying the workspace infrastructure.
+
+---
+
+# RTL Language Layer
+
+ChipLens treats RTL as a language rather than plain text.
+
+Current language features include:
+
+- RTL document model
+- RTL line model
+- RTL tokenizer
+- Syntax highlighting foundation
+- Symbol extraction
+- Outline generation
+- Structural block recognition
+- Code folding foundation
+- Search integration
+
+The long-term goal is to evolve this layer into a complete language engine.
+
+Planned future capabilities include:
+
+- Verilog parser
+- SystemVerilog parser
+- Abstract Syntax Tree (AST)
+- Symbol table
+- Go To Definition
+- Find References
+- Rename Symbol
+- Hover information
+- Semantic highlighting
+- Incremental parsing
+
+---
+
+# Compiler-Inspired Verification Framework
+
+The backend reasoning engine is organized as a deterministic pipeline of independent frameworks.
+
+Rather than performing verification as a monolithic process, ChipLens decomposes reasoning into a sequence of semantic transformations.
+
+```
+RTL Source
+      │
+      ▼
+Design Intelligence
+      │
+      ▼
+Semantic Evidence
+      │
+      ▼
+Property Synthesis
+      │
+      ▼
+Property Ranking
+      │
+      ▼
+Property Emission
+      │
+      ▼
+Explainability
+      │
+      ▼
+Verification Planning
+      │
+      ▼
+Coverage Intelligence
+      │
+      ▼
+Diagnostics Intelligence
+      │
+      ▼
+Repair Planning
+      │
+      ▼
+Verification Orchestrator
+```
+
+Every framework performs one clearly defined responsibility.
+
+Outputs are represented using immutable value objects.
+
+This architecture improves:
+
+- Testability
+- Deterministic execution
+- Reproducibility
 - Explainability
-- Repair planning
-- Evaluation results
-- Reports
-
-The workbench is intentionally modular.
-
-Future engineering tools—including the RTL editor, Property Explorer, Explainability Viewer, Coverage Dashboard, Diagnostics Explorer, and Repair Planner—will integrate through the existing panel architecture without modifying the workbench framework itself.
-
-# Evaluation
-
-ChipLens includes a reproducible evaluation framework that measures the complete reasoning pipeline on representative RTL designs.
-
-The evaluation focuses on the reasoning frameworks implemented by ChipLens rather than the performance of external formal verification engines.
-
-Current evaluation areas include:
-
-- End-to-end reasoning pipeline execution
-- Property generation effectiveness
-- Open-source RTL validation
-- Parser calibration
-- Property synthesis calibration
-- Cross-project generalization
-- Benchmark execution
-- Structural diagnostics
-- Coverage intelligence
-
-Every evaluation is reproducible and documented within the repository.
+- Long-term maintainability
 
 ---
 
-# Benchmark Suite
+# Current Backend Frameworks
 
-ChipLens contains a deterministic benchmark harness that executes the complete reasoning pipeline against representative RTL designs.
+ChipLens currently contains fourteen major reasoning frameworks.
 
-Current benchmark corpus:
-
-| Design | Description | Diagnostics | Repairs | Runtime |
-|----------|-------------|------------:|---------:|--------:|
-| Counter | 4-bit synchronous counter | 1 | 1 | ~3 ms |
-| FSM | Traffic-light controller | 1 | 1 | ~2 ms |
-| ALU | 32-bit combinational ALU | 1 | 1 | ~2 ms |
-| FIFO | Parameterized synchronous FIFO | 1 | 1 | ~3 ms |
-| UART | UART transmitter (8N1) | 1 | 1 | ~4 ms |
-
-Average reasoning pipeline runtime:
-
-**≈ 3 ms per benchmark design**
-
-> **Note**
->
-> Current benchmarks evaluate the ChipLens reasoning pipeline.
-> They intentionally exclude the runtime of external formal verification engines.
+| Framework | Responsibility |
+|------------|----------------|
+| Design Intelligence | Structural RTL analysis |
+| Semantic Evidence | Immutable semantic facts |
+| Property Synthesis | Candidate assertion generation |
+| Property Ranking | Deterministic prioritization |
+| Property Emission | Backend-independent property generation |
+| Explainability | Human-readable reasoning |
+| Verification Planning | Execution planning |
+| Formal Integration | Backend abstraction |
+| Coverage Intelligence | Coverage interpretation |
+| Counterexample Analysis | Trace interpretation |
+| Diagnostics Intelligence | Root-cause reasoning |
+| Repair Planning | Suggested design improvements |
+| Verification Orchestrator | Pipeline coordination |
+| Benchmark Framework | Empirical evaluation |
 
 ---
 
-# Property Generation Evaluation
+# AI & Natural Language Services
 
-ChipLens includes a dedicated evaluation methodology for measuring property synthesis effectiveness.
+ChipLens also contains an experimental natural language service layer.
 
-Rather than counting generated assertions alone, evaluation measures whether generated properties meaningfully cover verification-relevant RTL elements.
+Current research modules include:
 
-Current evaluation metrics include:
+- RTL generation from natural language
+- Testbench generation
+- Intent extraction
+- RTL explanation
+- FSM construction
+- Quality analysis
+- Pipeline orchestration
 
-- Generated properties
-- Useful properties
-- Weighted element coverage
-- Provider contribution
-- Malformed properties
-- Coverage gaps
-- Cross-project generalization
+These components are currently experimental and are not yet integrated into the primary engineering workspace.
 
-Following Sprint J calibration:
-
-| Metric | Result |
-|---------|-------:|
-| Total Property Providers | 8 |
-| Generated Properties | 32 |
-| Weighted Element Coverage | **92%** |
-| Malformed Properties | **0** |
-| Deterministic Generation | ✅ |
-| Provider Isolation | ✅ |
-
-The evaluation framework documents both successful synthesis and remaining limitations, allowing future improvements to be measured quantitatively rather than anecdotally.
+Future releases will expose these capabilities through the Engineering Workbench after the core RTL language infrastructure reaches production maturity.
 
 ---
 
-# Open-Source RTL Validation
+# Architectural Principles
 
-ChipLens is evaluated against RTL designs originating from independent open-source hardware projects.
+ChipLens follows several architectural principles consistently throughout the project.
 
-These evaluations measure how well the reasoning pipeline generalizes beyond designs created specifically for ChipLens.
+## Single Responsibility
 
-Current evaluation corpus:
+Every subsystem owns one well-defined responsibility.
 
-| Project | Domain | Result |
-|---------|--------|--------|
-| wb2axip Skid Buffer | AXI Flow Control | Parser calibrated successfully |
-| PicoRV32 Register File | RISC-V CPU | Parser robustness improved |
-| SERV ALU | Bit-Serial RISC-V | Parameterized RTL support validated |
-| Ibex RTL Module | Industrial RISC-V Core | Property synthesis evaluation completed |
-
-These evaluations have directly influenced several architectural improvements, including:
-
-- Keyword-boundary parser corrections
-- Memory-array detection
-- Width inference improvements
-- Parameterized RTL support
-- Memory interface extraction
-- Property synthesis calibration
-- Register property generation
-- Memory property generation
-
-Unlike synthetic examples, these evaluations represent independent codebases with differing design styles, improving confidence in the generality of the reasoning pipeline.
+Large monolithic managers are intentionally avoided.
 
 ---
 
-# Empirical Contributions
+## Immutable Models
 
-ChipLens emphasizes empirical software engineering.
+Communication between frameworks occurs through immutable data structures.
 
-Every architectural improvement is expected to be supported by:
-
-- Regression tests
-- Benchmark results
-- Calibration studies
-- Before/after comparisons
-- Open-source validation
-- Documented limitations
-
-The repository intentionally records unsuccessful experiments, parser limitations, calibration decisions, and remaining research challenges.
-
-The objective is to produce reproducible engineering evidence rather than isolated implementation claims.
+This reduces unintended side effects and simplifies testing.
 
 ---
 
-# Automated Testing
+## Test-Driven Engineering
 
-ChipLens places a strong emphasis on deterministic regression testing.
+Every architectural improvement is expected to include automated regression tests.
 
-Current statistics:
+The project currently maintains over **4,400 passing automated tests**, covering both backend reasoning and desktop workbench behavior.
 
-| Metric | Value |
-|---------|-------|
-| Automated Tests | **3196+** |
-| Test Failures | **0** |
-| Analyzer Issues | **0** |
+---
 
-The test suite covers:
+## Backend Independence
 
-- Parser correctness
-- Semantic analysis
-- Knowledge providers
-- Property providers
-- Ranking
-- Explainability
-- Planning
-- Coverage
-- Diagnostics
-- Repair planning
-- Formal integration
-- Engineering Workbench
-- Workspace Explorer
-- UI architecture
-- Regression scenarios
-- Open-source RTL calibrations
+The reasoning engine is intentionally separated from formal verification backends.
 
-The testing philosophy prioritizes deterministic behavior and architectural stability over implementation-specific testing.
+ChipLens is designed to integrate with multiple verification engines rather than depending on one implementation.
+
+---
+
+## Long-Term Extensibility
+
+The architecture is designed for future expansion into:
+
+- Language Server Protocol (LSP)
+- Plugin SDK
+- AI Engineering Assistant
+- Waveform visualization
+- Verification dashboards
+- Hardware design analytics
+- Distributed verification
+- Cloud execution
+
+# RTL Engineering Workbench
+
+The ChipLens Engineering Workbench is a desktop-first environment designed specifically for RTL engineering workflows.
+
+Unlike traditional text editors, the workbench is organized around engineering activities rather than files alone.
+
+Current workbench capabilities include:
+
+- Multi-panel desktop interface
+- RTL project explorer
+- Workspace controller
+- Multi-document editor
+- RTL document model
+- RTL tokenizer
+- Syntax highlighting foundation
+- Outline generation
+- Symbol extraction
+- Command palette
+- Global search
+- Problems panel
+- Output panel
+- Status bar
+- Responsive desktop layouts
+- Immutable workspace state
+- Keyboard-driven navigation
+
+The workbench is designed to evolve into a complete RTL engineering environment supporting editing, navigation, verification, diagnostics, AI assistance, and visualization.
+
+---
+
+# RTL Editor
+
+ChipLens treats RTL as a structured engineering language rather than plain text.
+
+Current editor capabilities include:
+
+## Editing
+
+- Multi-document workspace
+- Document tabs
+- Pinning documents
+- Recent documents
+- Read-only mode
+- Line numbering
+- Cursor tracking
+- Status reporting
+
+---
+
+## Navigation
+
+- Outline generation
+- Symbol extraction
+- Keyboard shortcuts
+- Global search
+- Command palette
+- Go To Symbol foundation
+- Breadcrumb infrastructure
+
+---
+
+## Language Features
+
+Current support includes:
+
+- RTL tokenizer
+- Structural block recognition
+- Syntax highlighting foundation
+- Code folding foundation
+- Module extraction
+- Port extraction
+- Parameter extraction
+- Always block recognition
+- Assign statement recognition
+
+Future milestones will introduce:
+
+- Full Verilog parser
+- SystemVerilog parser
+- Incremental parsing
+- Semantic highlighting
+- Symbol indexing
+- Rename Symbol
+- Go To Definition
+- Find References
+- Hover documentation
+
+---
+
+# Project System
+
+ChipLens includes an immutable project management system.
+
+Projects currently maintain:
+
+- Project metadata
+- Workspace state
+- Recent documents
+- Project explorer
+- Standard RTL folder structure
+- Active project context
+- Document management
+
+Default project organization
+
+```
+Project
+
+├── rtl/
+
+├── testbench/
+
+├── constraints/
+
+├── reports/
+
+└── docs/
+```
+
+Future releases will extend the project system with:
+
+- Build configurations
+- Simulation profiles
+- Verification sessions
+- Coverage history
+- Git integration
+- Workspace snapshots
 
 ---
 
 # Technology Stack
 
-| Category | Technologies |
-|-----------|--------------|
-| Language | Dart 3 |
-| Framework | Flutter |
-| Target Platforms | Windows, Linux, macOS, Web |
-| UI Architecture | Desktop-first Engineering Workbench |
-| Formal Verification | SymbiYosys, Yosys, Verilator, Icarus Verilog |
-| Testing | flutter_test |
-| Static Analysis | flutter analyze |
-| Version Control | Git + GitHub |
-| Documentation | Markdown |
-| License | MIT |
+## Frontend
 
-ChipLens deliberately separates the reasoning engine from verification backends, enabling future integration with additional formal verification tools without modifying the reasoning architecture.
+| Technology | Purpose |
+|------------|----------|
+| Flutter | Desktop and Web UI |
+| Dart | Application language |
+| Material 3 | Base component system |
+| Immutable Models | State management |
+| Responsive Layouts | Multi-platform support |
+
+---
+
+## Backend
+
+| Component | Purpose |
+|------------|----------|
+| Dart | Verification framework |
+| Compiler-inspired architecture | Semantic reasoning |
+| Immutable value objects | Deterministic execution |
+| Property providers | Assertion synthesis |
+| Verification orchestrator | Pipeline coordination |
+
+---
+
+## Development Practices
+
+ChipLens follows several engineering practices throughout the project.
+
+- Immutable architecture
+- Separation of concerns
+- Modular framework design
+- Extensive automated testing
+- Deterministic execution
+- Continuous regression testing
+- Desktop-first UX
 
 ---
 
 # Repository Structure
 
-```text
-ChipLens/
+```
+lib/
+
+├── core/
+│   ├── models/
+│   ├── services/
+│   ├── workspace/
+│   └── verification/
 │
-├── frontend/
-│   ├── lib/
-│   │   ├── backend/
-│   │   │   ├── design_intelligence/
-│   │   │   ├── semantic_evidence/
-│   │   │   ├── property_inference/
-│   │   │   ├── explainability/
-│   │   │   ├── planning/
-│   │   │   ├── formal/
-│   │   │   ├── coverage/
-│   │   │   ├── coverage_intelligence/
-│   │   │   ├── counterexample/
-│   │   │   ├── diagnostics/
-│   │   │   ├── repair_planning/
-│   │   │   └── orchestrator/
-│   │   │
-│   │   ├── ui/
-│   │   │   ├── workbench/
-│   │   │   ├── navigation/
-│   │   │   ├── responsive/
-│   │   │   └── theme/
-│   │   │
-│   │   └── models/
-│   │
-│   ├── benchmarks/
-│   └── test/
+├── ui/
+│   ├── workbench/
+│   ├── editor/
+│   ├── explorer/
+│   ├── panels/
+│   └── themes/
 │
-├── docs/
-│   ├── evaluation/
-│   ├── research/
-│   └── architecture/
+├── backend/
+│   ├── design_intelligence/
+│   ├── property_inference/
+│   ├── explainability/
+│   ├── planning/
+│   ├── diagnostics/
+│   ├── coverage/
+│   ├── repair/
+│   └── orchestrator/
 │
-├── LICENSE
-├── CHANGELOG.md
-└── README.md
+├── benchmarks/
+│
+└── test/
 ```
 
-The repository is organized around architectural responsibilities rather than implementation layers, reflecting the same modular philosophy adopted throughout the reasoning pipeline.
+The repository is intentionally organized around engineering subsystems rather than UI pages.
+
+---
 
 # Getting Started
 
-## Requirements
+## Prerequisites
 
-- Flutter 3.x
-- Dart SDK 3.x
+- Flutter SDK
+- Dart SDK
 - Git
 
-Optional (for formal verification):
-
-- SymbiYosys
-- Yosys
-- Verilator
-- Icarus Verilog
-
----
-
-## Clone the Repository
+Verify installation
 
 ```bash
-git clone https://github.com/<your-username>/ChipLens.git
-cd ChipLens/frontend
+flutter doctor
 ```
 
 ---
 
-## Install Dependencies
+## Clone
+
+```bash
+git clone https://github.com/<username>/ChipLens.git
+
+cd ChipLens
+```
+
+---
+
+## Install dependencies
 
 ```bash
 flutter pub get
@@ -756,231 +747,274 @@ flutter pub get
 
 ---
 
-## Run the Application
+## Run
+
+Desktop
 
 ```bash
-flutter run
+flutter run -d windows
 ```
 
-Desktop platforms are currently the primary development target.
-
----
-
-## Run Static Analysis
+Web
 
 ```bash
-flutter analyze
-```
-
-Expected result:
-
-```
-No issues found.
+flutter run -d chrome
 ```
 
 ---
 
-## Run the Test Suite
+# Running Tests
+
+Execute the complete regression suite
 
 ```bash
 flutter test
 ```
 
-Current status:
+Static analysis
 
-```
-3196+ Passing Tests
-
-0 Failures
-
-0 Analyzer Issues
+```bash
+flutter analyze
 ```
 
----
+The project currently maintains
 
-# Current Limitations
-
-ChipLens is an active research platform and continues to evolve.
-
-Current limitations include:
-
-## Verification Backends
-
-Formal execution currently targets SymbiYosys.
-
-Portable backend discovery and configurable toolchain management are under active development.
+- **4,429 passing automated tests**
+- **0 failing tests**
+- **3 intentionally skipped tests**
 
 ---
 
-## Property Synthesis
+# Benchmark Framework
 
-Current property synthesis emphasizes deterministic safety properties.
+ChipLens includes a benchmark framework for evaluating the verification pipeline.
 
-Future work includes:
+The benchmark runner coordinates:
 
-- Temporal property inference
-- Protocol-aware synthesis
-- Cross-module reasoning
-- Multi-clock verification
-- Advanced memory consistency properties
+- Design analysis
+- Property generation
+- Coverage reasoning
+- Diagnostics
+- Repair planning
 
----
-
-## RTL Support
-
-The parser currently focuses on synthesizable Verilog.
-
-Future work includes:
-
-- Additional SystemVerilog constructs
-- Generate block enhancements
-- Interface support
-- Package-aware parsing
+This framework enables empirical evaluation of backend improvements while maintaining deterministic execution.
 
 ---
 
-## Engineering Workbench
+# Open-Source RTL Validation
 
-Current implementation includes:
+ChipLens validates portions of its backend framework using publicly available RTL designs.
 
-- Engineering Workbench
-- Workspace Explorer
-- Responsive desktop layout
-- Panel framework
+Current validation includes examples derived from projects such as:
 
-Future engineering tools include:
+- PicoRV32
+- SERV
 
-- RTL Workspace
-- Property Explorer
-- Explainability Viewer
-- Coverage Dashboard
-- Diagnostics Explorer
-- Repair Planner
-- Verification Session Viewer
+These designs are used exclusively for validation and regression testing.
+
+ChipLens does **not** claim compatibility certification with any external RTL project.
 
 ---
 
-## AI Integration
+# Automated Testing Philosophy
 
-ChipLens intentionally separates deterministic reasoning from AI-assisted workflows.
+Automated testing is considered a core architectural requirement rather than an optional quality assurance step.
 
-Future research may investigate:
+Tests currently cover:
 
-- Property recommendation
-- Natural-language verification queries
-- Automated explanation refinement
-- Intelligent repair suggestions
+## Frontend
 
-while preserving deterministic verification behavior.
+- Workspace models
+- Explorer
+- RTL editor
+- Toolbar
+- Status bar
+- Problems panel
+- Outline generation
+- Workspace state
+- Navigation
+- Project management
+
+---
+
+## Backend
+
+- Property providers
+- Verification orchestrator
+- Semantic reasoning
+- Explainability
+- Diagnostics
+- Repair planning
+- Coverage intelligence
+- Benchmark execution
+
+Regression testing accompanies every architectural milestone to reduce the likelihood of unintended behavior changes.
+
+---
+
+# Documentation
+
+Project documentation is organized into several categories.
+
+- Architecture
+- Backend frameworks
+- Engineering workbench
+- Verification pipeline
+- Research notes
+- Future roadmap
+
+Additional documentation will continue to expand as the project matures.
+
+# Implementation Status
+
+The following table summarizes the current implementation status of major ChipLens subsystems.
+
+| Component | Status |
+|-----------|--------|
+| Desktop Workbench | ✅ Stable |
+| Project System | ✅ Stable |
+| Workspace Engine | ✅ Stable |
+| RTL Explorer | ✅ Stable |
+| Multi-Document Workspace | ✅ Stable |
+| Command Palette | ✅ Stable |
+| Global Search | ✅ Stable |
+| Problems Panel | ✅ Stable |
+| Output Panel | ✅ Stable |
+| Status Bar | ✅ Stable |
+| RTL Tokenizer | ✅ Stable |
+| Outline Generation | ✅ Stable |
+| Symbol Extraction | ✅ Stable |
+| Backend Verification Framework | ✅ Stable |
+| Benchmark Framework | ✅ Stable |
+| Explainability Framework | ✅ Stable |
+| Diagnostics Framework | ✅ Stable |
+| Repair Planning Framework | ✅ Stable |
+| Coverage Intelligence | ✅ Stable |
+| RTL Parser | 🚧 Planned |
+| AST | 🚧 Planned |
+| Symbol Index | 🚧 Planned |
+| Go To Definition | 🚧 Planned |
+| Find References | 🚧 Planned |
+| Rename Symbol | 🚧 Planned |
+| Waveform Viewer | 🚧 Planned |
+| Module Hierarchy | 🚧 Planned |
+| FSM Visualization | 🚧 Planned |
+| Coverage Dashboard | 🚧 Planned |
+| Verification Dashboard | 🚧 Planned |
+| AI Workspace Integration | 🧪 Experimental |
 
 ---
 
 # Roadmap
 
-## Phase I
+ChipLens is developed incrementally through architecture-driven milestones.
 
-### Compiler-Inspired Reasoning Platform
-
-- ✅ Design Intelligence
-- ✅ Semantic Evidence
-- ✅ Candidate Property Synthesis
-- ✅ Property Ranking
-- ✅ Property Emitter
-- ✅ Explainability
-- ✅ Verification Planning
-- ✅ Formal Verification
-- ✅ Coverage Intelligence
-- ✅ Diagnostics Intelligence
-- ✅ Repair Planning
-- ✅ Verification Orchestration
-
-Completed.
+Rather than implementing isolated features, each milestone introduces a complete engineering subsystem.
 
 ---
 
-## Phase II
+## Phase I — Desktop Engineering Workbench
 
-### Research Validation
+Status: **Largely Complete**
 
-- ✅ Open-source RTL evaluation
-- ✅ Benchmark suite
-- ✅ Property generation evaluation
-- ✅ Calibration studies
-- ✅ Coverage analysis
-- ✅ Empirical documentation
+Focus:
 
-Completed.
-
----
-
-## Phase III
-
-### Engineering Workbench
-
-- ✅ Desktop-first architecture
-- ✅ Responsive workbench
-- ✅ Panel registry
-- ✅ Immutable workbench state
-- ✅ Workspace Explorer
-
-In Progress:
-
-- RTL Workspace
-- Property Explorer
-- Explainability Viewer
-- Coverage Dashboard
-- Diagnostics Explorer
-- Repair Planner
-- Verification Session Viewer
+- Project management
+- Workspace engine
+- Explorer
+- Multi-document editor
+- Search
+- Command palette
+- Problems panel
+- Output panel
+- Status bar
+- Responsive desktop interface
 
 ---
 
-## Phase IV
+## Phase II — RTL Language Engine
 
-### Platform Integration
+Status: **In Progress**
 
-Planned:
+Focus:
 
-- Portable formal backend discovery
-- Toolchain configuration
-- Project persistence
-- Workspace management
-- Command-line interface
-- Improved web deployment
-
----
-
-## Phase V
-
-### Research & Publication
-
-Planned:
-
-- Compiler-inspired RTL verification paper
-- Property synthesis evaluation paper
-- Explainable verification paper
-- Engineering workbench paper
-- Expanded benchmark suite
+- Verilog parser
+- SystemVerilog parser
+- AST generation
+- Symbol indexing
+- Incremental parsing
+- Semantic highlighting
+- Go To Definition
+- Find References
+- Rename Symbol
 
 ---
 
-# Research Vision
+## Phase III — RTL Engineering
 
-ChipLens explores a broader research direction:
+Status: **Planned**
 
-> **Applying compiler-inspired software engineering principles to hardware verification.**
+Focus:
 
-Rather than replacing existing verification engines, ChipLens investigates how deterministic semantic reasoning can improve:
+- Module hierarchy
+- Signal graph
+- Dependency graph
+- Clock domain analysis
+- Reset domain analysis
+- FSM visualization
+- Design metrics
+- Cross-module navigation
 
-- Explainability
-- Reproducibility
-- Automation
+---
+
+## Phase IV — Verification
+
+Status: **Planned**
+
+Focus:
+
+- Waveform viewer
+- Coverage visualization
+- Assertion management
+- Regression sessions
+- Verification reports
+- Counterexample navigation
+
+---
+
+## Phase V — AI Engineering Assistant
+
+Status: **Research**
+
+Focus:
+
+- RTL explanation
+- Testbench generation
+- RTL generation
+- Intent extraction
+- Engineering documentation
+- Design review assistance
+
+Experimental NLP modules already exist in the repository but are not yet integrated into the primary workbench.
+
+---
+
+# Research Directions
+
+ChipLens is also intended to serve as a research platform.
+
+Current research interests include:
+
+- Compiler-inspired RTL reasoning
+- Deterministic semantic analysis
+- Automated assertion synthesis
+- Explainable verification
 - Verification planning
-- Coverage interpretation
-- Diagnostics
-- Repair planning
+- RTL documentation generation
+- AI-assisted hardware engineering
+- Large-scale RTL understanding
 
-The long-term objective is to establish a reusable semantic reasoning layer capable of supporting both academic research and practical engineering workflows.
+The project is intentionally structured so these research areas can evolve independently without disrupting the desktop engineering environment.
 
 ---
 
@@ -990,34 +1024,95 @@ Contributions are welcome.
 
 Areas of interest include:
 
-- RTL parsing
-- Semantic analysis
+### Engineering Workbench
+
+- Desktop UX
+- Workspace Engine
+- RTL Editor
+- Performance
+- Accessibility
+
+### RTL Language Engine
+
+- Verilog parsing
+- SystemVerilog parsing
+- Symbol indexing
+- Navigation
+- Incremental parsing
+
+### Verification
+
 - Property synthesis
-- Verification planning
-- Formal verification integration
-- Coverage intelligence
 - Diagnostics
-- Engineering Workbench
+- Coverage
+- Repair planning
+
+### AI
+
+- RTL explanation
+- Testbench generation
 - Documentation
-- Benchmark development
-- Testing
+- Engineering assistants
 
-Please ensure that all contributions:
+Please accompany significant changes with automated tests whenever practical.
 
-- preserve deterministic behavior
-- include regression tests
-- maintain architectural modularity
-- avoid framework-specific coupling
-- pass `flutter analyze`
-- pass the complete automated test suite
+---
+
+# Design Principles
+
+Every architectural decision in ChipLens follows several long-term principles.
+
+## Engineering First
+
+The primary objective is improving engineering productivity.
+
+Visual polish should support engineering workflows rather than replace them.
+
+---
+
+## Deterministic Behavior
+
+Identical RTL inputs should produce identical semantic outputs whenever possible.
+
+This improves reproducibility, benchmarking, and explainability.
+
+---
+
+## Modular Systems
+
+Large monolithic managers are intentionally avoided.
+
+Subsystems communicate through immutable interfaces.
+
+---
+
+## Extensibility
+
+ChipLens is designed to accommodate future language engines, verification frameworks, plugins, AI services, and research prototypes without requiring architectural redesign.
+
+---
+
+## Testability
+
+Regression testing is considered an architectural requirement.
+
+Every major subsystem should remain independently testable.
 
 ---
 
 # Citation
 
-If ChipLens contributes to your research, please cite the project.
+If you use ChipLens in academic research, teaching, or publications, please cite the repository.
 
-A formal citation will be provided following the first research publication.
+```text
+ChipLens
+
+An Extensible RTL Engineering Workbench
+and Compiler-Inspired Verification Platform
+
+GitHub:
+https://github.com/<username>/ChipLens
+```
 
 ---
 
@@ -1029,41 +1124,37 @@ See the LICENSE file for details.
 
 ---
 
-# About the Author
+# Acknowledgements
 
-ChipLens is an independent open-source research project exploring the intersection of:
+ChipLens draws inspiration from many outstanding engineering tools and research communities, including:
 
-- Electronic Design Automation (EDA)
-- Formal Verification
-- Compiler Design
-- Software Architecture
-- Verification Engineering
-- Explainable Systems
+- VS Code
+- JetBrains IDEs
+- LLVM
+- OpenROAD
+- Yosys
+- SymbiYosys
+- PicoRV32
+- SERV
+- Flutter
+- Dart
 
-The project is developed as both an engineering platform and a long-term research initiative investigating compiler-inspired approaches to RTL verification.
-
----
-
-# Project Status
-
-ChipLens has evolved from an experimental prototype into a research-oriented engineering platform.
-
-Current implementation includes:
-
-- 14 reasoning frameworks
-- 8 property providers
-- Desktop-first Engineering Workbench
-- Workspace Explorer
-- Open-source RTL evaluation
-- Deterministic reasoning pipeline
-- Empirical benchmark suite
-- 3196+ automated tests
-- Zero analyzer issues
-- Zero failing tests
-
-Development continues toward a complete verification engineering environment integrating deterministic reasoning, explainability, and modern engineering workflows.
+ChipLens is an independent project and is not affiliated with or endorsed by any of the above.
 
 ---
 
-**ChipLens**
-*Compiler-Inspired Semantic RTL Verification Research Platform*
+# Final Thoughts
+
+ChipLens began as an exploration into compiler-inspired verification.
+
+It has since evolved into a broader engineering platform that combines desktop tooling, RTL language technology, verification research, and future AI-assisted workflows.
+
+The long-term vision is not to replace existing Electronic Design Automation (EDA) tools, but to explore how modern software engineering techniques can make RTL development more understandable, productive, and extensible.
+
+As the project continues to evolve, ChipLens aims to remain grounded in three core values:
+
+- **Engineering rigor**
+- **Architectural clarity**
+- **Honest, incremental progress**
+
+Every implemented feature is intended to be testable, maintainable, and extensible, providing a foundation for both practical engineering workflows and future research.
