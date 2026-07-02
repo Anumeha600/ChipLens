@@ -1,15 +1,19 @@
-# ChipLens Lite
+# ChipLens
 
-> **Compiler-Inspired Semantic RTL Engineering and Verification Platform**
+> **Compiler-Inspired Semantic RTL Engineering and Verification Research Platform**
 
-**Build • Understand • Analyze • Verify RTL Designs**
+<p align="center">
+
+**Build • Understand • Analyze • Verify • Evaluate • Research**
+
+</p>
 
 <p align="center">
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)
 ![Platform](https://img.shields.io/badge/Desktop-Windows%20|%20Linux%20|%20macOS-blue)
-![Tests](https://img.shields.io/badge/Tests-6404%20Passing-success)
+![Tests](https://img.shields.io/badge/Tests-7801%2B-success)
 ![Analyzer](https://img.shields.io/badge/flutter%20analyze-0%20Errors-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -17,238 +21,588 @@
 
 ---
 
-## Overview
+# Compiler-Inspired RTL Engineering
 
-ChipLens Lite is a **compiler-inspired RTL engineering and verification platform** that unifies parsing, semantic analysis, property inference, formal verification, explainability, and reproducible evaluation into a single workflow.
+ChipLens is a **compiler-inspired semantic RTL engineering and verification research platform** that investigates how reusable semantic representations can improve hardware engineering workflows.
 
-Rather than treating RTL as plain text, ChipLens constructs a reusable semantic representation of hardware designs. That semantic model is shared across navigation, dependency analysis, property inference, verification, diagnostics, and evaluation instead of repeatedly analyzing the same design in multiple independent stages.
+Instead of repeatedly analyzing RTL source code for every engineering task, ChipLens constructs a shared semantic model that powers:
 
-ChipLens is being developed with two complementary goals:
+- RTL parsing
+- Abstract syntax tree construction
+- Symbol resolution
+- Semantic analysis
+- Design intelligence
+- Property inference
+- Formal verification orchestration
+- Diagnostics
+- Explainability
+- Reproducible experimental evaluation
 
-- **Engineering Platform** — an integrated desktop workbench for RTL design analysis and verification.
-- **Research Platform** — a reproducible framework for investigating compiler-inspired verification methodologies.
-
----
-
-# Motivation
-
-RTL verification today is typically performed using multiple disconnected tools.
-
-A common workflow requires engineers to repeatedly switch between:
-
-- RTL parsers
-- lint tools
-- simulators
-- formal verification tools
-- waveform viewers
-- manually written SystemVerilog Assertions
-- external scripts for collecting experimental results
-
-Each tool performs its own analysis of the design, resulting in duplicated work and fragmented engineering workflows.
-
-ChipLens investigates whether a **shared semantic representation**, inspired by modern compiler architectures, can provide a better foundation for RTL engineering and verification.
+The project combines an engineering workbench with a research platform capable of generating publication-ready datasets, statistical analyses, figures, reports, and benchmark artifacts.
 
 ---
 
-# Design Philosophy
+# Vision
 
-ChipLens follows five core principles.
+Modern RTL engineering is often performed using a collection of disconnected tools.
 
-### Compiler-Inspired
+A typical verification workflow repeatedly performs similar analyses while switching between parsers, simulators, formal verification tools, waveform viewers, scripting environments, and manually written assertions.
 
-RTL is treated as a structured programming language rather than plain text.
+ChipLens investigates a different approach.
 
-### Semantic-First
+Inspired by modern compiler architectures, ChipLens computes semantic information once and reuses it throughout the engineering workflow.
 
-Semantic information is extracted once and reused throughout the platform.
-
-### Deterministic
-
-The same RTL and configuration always produce identical analysis and verification results.
-
-### Modular
-
-Each stage performs one well-defined task while communicating through immutable data models.
-
-### Reproducible
-
-Evaluation automatically generates structured research artifacts suitable for experimental studies.
+The long-term research objective is to determine whether **compiler-inspired semantic reuse** can improve RTL engineering by reducing redundant analysis, enabling deterministic reasoning, and supporting reproducible verification methodologies.
 
 ---
 
-# System Architecture
+# Research Question
 
-```
-                     SystemVerilog RTL
-                             │
-                             ▼
-                    Lexical Analysis
-                             │
-                             ▼
-                          Parser
-                             │
-                             ▼
-                 Abstract Syntax Tree (AST)
-                             │
-                             ▼
-                     Symbol Resolution
-                             │
-                             ▼
-                    Semantic Analysis
-                             │
-       ┌─────────────────────┼─────────────────────┐
-       │                     │                     │
-       ▼                     ▼                     ▼
- Dependency Analysis   Design Intelligence   Navigation
-       │                     │                     │
-       └──────────────┬──────┴──────────────┬──────┘
-                      ▼                     ▼
-              Property Inference     Explainability
-                      │
-                      ▼
-            Formal Verification Engine
-                      │
-                      ▼
-             Evaluation Framework
-                      │
-                      ▼
-         Reproducible Research Artifacts
-```
+ChipLens is built around a single central research question.
 
-Unlike traditional RTL workflows, every stage operates on a shared semantic representation instead of independently re-analyzing the original source code.
+> **Can compiler-inspired semantic architectures improve RTL engineering workflows by enabling reusable semantic analysis across parsing, navigation, property inference, diagnostics, and verification?**
+
+Every subsystem, benchmark, experiment, and evaluation framework in ChipLens contributes toward answering this question using measurable experimental evidence rather than anecdotal examples.
 
 ---
 
-# Research Direction
+# Why ChipLens?
 
-ChipLens is being developed around the following research question:
+Unlike traditional RTL engineering environments, ChipLens is designed around a reusable semantic pipeline rather than independent analysis stages.
 
-> **Can compiler-inspired semantic architectures improve RTL engineering workflows by enabling reusable semantic analysis across parsing, navigation, verification and property inference?**
+Instead of reparsing or reanalyzing designs for each engineering task, semantic information is generated once and shared across the entire platform.
 
-The platform does **not** aim to replace existing EDA tools.
+This architecture enables:
 
-Instead, it investigates how semantic reasoning can complement established tools by providing a unified semantic foundation for engineering workflows and verification research.
+- Deterministic semantic reasoning
+- Reduced duplicate computation
+- Consistent engineering analysis
+- Modular verification workflows
+- Reproducible experimentation
+- Publication-oriented research evaluation
 
----
-
-# Core Capabilities
-
-ChipLens is organized into modular subsystems that together form an end-to-end RTL engineering workflow.
-
-Each subsystem has a single responsibility and produces structured outputs that are consumed by later stages of the pipeline.
-
----
-
-## RTL Front-End
-
-The front-end transforms SystemVerilog source into structured intermediate representations suitable for semantic reasoning.
-
-### Features
-
-- SystemVerilog parsing
-- Abstract Syntax Tree (AST) construction
-- Symbol table generation
-- Source mapping
-- Error recovery
-- Multi-module project support
+Rather than replacing established EDA tools, ChipLens investigates how semantic reasoning can complement existing verification workflows while providing a reusable research platform for compiler-inspired RTL engineering.
 
 ---
 
-## Semantic Analysis
+# Research Contributions
 
-The semantic engine enriches parsed RTL with engineering knowledge required for downstream analyses.
+ChipLens currently investigates six complementary research directions.
 
-Current analyses include:
+| Research Area | Objective |
+|--------------|-----------|
+| Compiler-Inspired RTL Architecture | Reusable semantic representations for RTL engineering |
+| Semantic Analysis | Deterministic extraction of structural and behavioral information |
+| Property Inference | Automatic generation of candidate formal properties |
+| Verification Methodology | Semantic-driven verification orchestration |
+| Engineering Productivity | Investigation of semantic workflows for RTL development |
+| Reproducible Research | Automated generation of datasets, reports, figures and statistical artifacts |
 
-- Signal dependency analysis
-- Driver and reader identification
-- Dataflow analysis
-- Fan-in and fan-out computation
-- Clock domain analysis
-- Reset domain analysis
-- FSM candidate identification
-- Structural connectivity analysis
-
-This semantic information becomes the shared foundation for navigation, diagnostics, verification and evaluation.
+Together, these directions form a unified research program rather than a collection of independent software features.
 
 ---
 
-## Property Inference
+# Current Research Status
 
-ChipLens investigates semantic-driven generation of formal verification properties.
-
-Current inference providers include:
-
-| Provider | Purpose |
-|-----------|---------|
-| FSM | State transition safety |
-| Handshake | Valid-ready protocol correctness |
-| Counter | Counter progression and overflow |
-| Register | Register stability |
-| Reset | Reset correctness |
-| Arithmetic | Arithmetic safety |
-| Memory | Memory consistency |
-| Generic Safety | Default structural properties |
-
-Candidate properties are ranked before formal verification using engineering heuristics.
-
----
-
-## Formal Verification
-
-ChipLens integrates property generation with formal verification through a deterministic multi-stage pipeline.
-
-Current pipeline stages include:
-
-1. Design Intelligence
-2. Evidence Extraction
-3. Property Generation
-4. Property Ranking
-5. Property Emission
-6. Verification Planning
-7. Formal Verification
-8. Coverage Analysis
-9. Counterexample Analysis
-10. Diagnostic Generation
-11. Repair Planning
-
-Each stage operates on structured semantic information rather than reparsing RTL.
-
----
-
-## Navigation & Engineering Productivity
-
-ChipLens provides semantic IDE capabilities inspired by modern software development environments.
-
-Supported functionality includes:
-
-- Go To Definition
-- Find References
-- Symbol Outline
-- Project Explorer
-- Workspace Search
-- Diagnostics Panel
-- Problems View
-- Command Palette
-
-Navigation is driven by semantic analysis rather than textual matching.
-
----
-
-## Evaluation Framework
-
-ChipLens includes an integrated evaluation framework for repeatable engineering experiments.
+ChipLens has evolved beyond a prototype into a reproducible research platform.
 
 Current capabilities include:
 
-- Automated benchmark execution
-- Pipeline timing collection
-- Verification summaries
-- Benchmark reports
-- Research artifact generation
-- Structured CSV / JSON / Markdown export
+| Component | Status |
+|-----------|--------|
+| Compiler-Inspired RTL Pipeline | ✅ Complete |
+| Semantic Analysis Engine | ✅ Complete |
+| Property Inference Engine | ✅ Complete |
+| Formal Verification Orchestration | ✅ Complete |
+| Benchmark Infrastructure | ✅ Complete |
+| Experiment Framework | ✅ Complete |
+| Research Analysis Engine | ✅ Complete |
+| Semantic Reuse Evaluation | ✅ Complete |
+| Duplicate Computation Evaluation | ✅ Complete |
+| Large-Scale Benchmark Validation | ✅ Complete |
+| Engineering Productivity Framework | ✅ Ready for Participant Studies |
 
-The framework is designed to support reproducible experimentation and future statistical analysis.
+The current development focus has shifted from feature implementation toward evidence generation, experimental validation, and research publication.
+
+---
+
+# Compiler-Inspired Architecture
+
+ChipLens is designed around a compiler-inspired execution model.
+
+Instead of treating RTL as plain text throughout the engineering workflow, ChipLens progressively transforms source code into increasingly richer semantic representations.
+
+Each stage performs a single deterministic responsibility while exposing reusable semantic information to downstream consumers.
+
+Unlike traditional workflows, semantic information is computed once and reused across multiple engineering tasks rather than repeatedly reconstructed.
+
+---
+
+## Semantic Engineering Pipeline
+
+```text
+                    RTL Source
+                         │
+                         ▼
+                Lexical Analysis
+                         │
+                         ▼
+                 RTL Parser
+                         │
+                         ▼
+            Abstract Syntax Tree (AST)
+                         │
+                         ▼
+                Symbol Resolution
+                         │
+                         ▼
+               Semantic Analysis
+                         │
+                         ▼
+          Design Intelligence Engine
+                         │
+                         ▼
+            Property Inference Engine
+                         │
+                         ▼
+      Formal Verification Orchestration
+                         │
+                         ▼
+            Diagnostics & Explainability
+                         │
+                         ▼
+          Experiment & Research Pipeline
+                         │
+                         ▼
+         Datasets • Statistics • Reports
+```
+
+---
+
+# Semantic Reuse
+
+The central architectural principle of ChipLens is **semantic reuse**.
+
+Rather than allowing every subsystem to independently parse and analyze RTL source code, ChipLens constructs a shared semantic representation that becomes the foundation for the entire engineering workflow.
+
+The same semantic information is reused by:
+
+- Navigation
+- Symbol lookup
+- Dependency analysis
+- Design intelligence
+- Property inference
+- Diagnostics
+- Verification orchestration
+- Research evaluation
+
+This compiler-inspired architecture minimizes redundant analysis while ensuring deterministic behavior across engineering tasks.
+
+---
+
+# Architecture Philosophy
+
+Each pipeline stage satisfies three architectural principles.
+
+## 1. Single Responsibility
+
+Every stage performs one clearly defined analysis.
+
+Examples include:
+
+- Parsing
+- Symbol construction
+- Semantic reasoning
+- Property inference
+- Verification orchestration
+
+No stage performs unrelated work.
+
+---
+
+## 2. Immutable Semantic Objects
+
+Intermediate representations are treated as immutable semantic artifacts.
+
+Rather than modifying existing structures, downstream stages consume previously generated semantic information.
+
+This improves:
+
+- reproducibility
+- deterministic execution
+- debugging
+- testing
+- experiment repeatability
+
+---
+
+## 3. Semantic Reuse
+
+Semantic information is intentionally shared across the pipeline.
+
+Instead of repeatedly reconstructing engineering knowledge, later stages consume previously computed semantic objects.
+
+This allows engineering analyses to remain modular while avoiding duplicated semantic computation.
+
+---
+
+# Pipeline Components
+
+| Stage | Purpose | Output |
+|--------|---------|--------|
+| Parser | Parse SystemVerilog source | Abstract Syntax Tree |
+| AST Builder | Construct syntax hierarchy | Immutable AST |
+| Symbol Resolver | Build symbol tables | Symbol graph |
+| Semantic Analyzer | Extract structural semantics | Semantic model |
+| Design Intelligence | Analyze architecture | Engineering insights |
+| Property Inference | Generate candidate assertions | Property set |
+| Verification Engine | Coordinate verification workflow | Verification results |
+| Diagnostics Engine | Explain engineering findings | Diagnostics |
+| Research Engine | Produce reproducible artifacts | Datasets and reports |
+
+---
+
+# Information Flow
+
+ChipLens separates syntax, semantics, verification, and experimentation into reusable stages.
+
+```text
+RTL
+ │
+ ▼
+Parser
+ │
+ ▼
+AST
+ │
+ ▼
+Semantic Model
+ ├──────────────┐
+ ▼              ▼
+Navigation   Design Intelligence
+ │              │
+ ├──────┐       │
+ ▼      ▼       ▼
+Diagnostics  Property Inference
+        │       │
+        └───┬───┘
+            ▼
+Formal Verification
+            │
+            ▼
+Research Analysis
+            │
+            ▼
+Datasets • Statistics • Reports
+```
+
+This separation enables engineering features and research experiments to operate on the same semantic foundation, ensuring that every analysis is reproducible and consistent across the platform.
+
+---
+
+# Architectural Characteristics
+
+| Characteristic | Description |
+|----------------|-------------|
+| Compiler-inspired | Multi-stage deterministic semantic pipeline |
+| Immutable | Intermediate semantic representations remain unchanged after construction |
+| Modular | Independent analysis stages communicate through well-defined semantic objects |
+| Reusable | Semantic information is shared rather than recomputed |
+| Deterministic | Identical RTL produces identical semantic outputs |
+| Testable | Every stage can be evaluated independently |
+| Reproducible | Experiments generate identical research artifacts from identical inputs |
+
+---
+
+# Architectural Validation
+
+The current implementation has been evaluated through automated architectural experiments.
+
+Highlights include:
+
+- **63.2% reduction in redundant pipeline computations** through semantic reuse compared with an experimental recomputation baseline.
+- **100% parser success** across the evaluated benchmark corpus.
+- Automated generation of reproducible datasets, reports, statistical summaries, and publication-ready artifacts.
+- Semantic reuse verified across multiple downstream engineering components.
+
+These results provide initial evidence supporting the compiler-inspired architectural model and establish a foundation for future large-scale evaluation.
+
+---
+
+# Experimental Validation
+
+ChipLens is evaluated using a reproducible experimental methodology inspired by empirical software engineering and hardware verification research.
+
+Rather than relying on anecdotal examples or manually collected observations, every experiment automatically generates structured datasets, statistical analyses, publication-ready tables, reproducible figures, and comprehensive research reports.
+
+The objective is to evaluate the effectiveness of compiler-inspired semantic architectures using measurable evidence.
+
+---
+
+# Research Infrastructure
+
+ChipLens includes a complete research infrastructure for automated experimentation.
+
+| Component | Status |
+|-----------|--------|
+| Benchmark Registry | ✅ |
+| Experiment Engine | ✅ |
+| Statistical Analysis Engine | ✅ |
+| Semantic Reuse Evaluation | ✅ |
+| Duplicate Computation Evaluation | ✅ |
+| Large-Scale Validation Framework | ✅ |
+| Research Analysis Engine | ✅ |
+| Productivity Evaluation Framework | ✅ |
+| Automated Report Generation | ✅ |
+
+---
+
+# Experimental Pipeline
+
+Every evaluation follows the same reproducible workflow.
+
+```text
+Benchmark Corpus
+        │
+        ▼
+Experiment Engine
+        │
+        ▼
+Semantic Pipeline
+        │
+        ▼
+Metric Collection
+        │
+        ▼
+Statistical Analysis
+        │
+        ▼
+Research Findings
+        │
+        ▼
+Publication Artifacts
+```
+
+Each execution automatically produces datasets, reports, figures, statistical summaries, and experiment metadata without manual post-processing.
+
+---
+
+# Research Datasets
+
+The evaluation framework currently generates five primary datasets.
+
+| Dataset | Description |
+|----------|-------------|
+| DS001 | Parser performance and robustness |
+| DS002 | Semantic analysis and structural metrics |
+| DS003 | RTL structural complexity characterization |
+| DS004 | Property inference evaluation |
+| DS005 | Verification execution metrics |
+
+These datasets serve as the foundation for subsequent statistical analysis and experimental evaluation.
+
+---
+
+# Experimental Studies
+
+ChipLens currently includes several complementary evaluation studies.
+
+| Study | Objective | Status |
+|--------|-----------|--------|
+| Parser Validation | Evaluate parsing robustness across benchmark designs | ✅ |
+| Semantic Analysis | Measure structural semantic extraction | ✅ |
+| Property Inference | Evaluate automated assertion generation | ✅ |
+| Semantic Reuse Study | Quantify reusable semantic computation | ✅ |
+| Duplicate Computation Study | Compare semantic reuse against recomputation | ✅ |
+| Large-Scale Validation | Validate pipeline across benchmark corpus | ✅ |
+| Productivity Framework | Prepare controlled human studies | ✅ Ready |
+
+---
+
+# Current Research Statistics
+
+| Metric | Current Value |
+|---------|--------------:|
+| Automated Tests | **7,801+** |
+| Analyzer Errors | **0** |
+| Benchmark Designs | **50** |
+| Fully Evaluated Corpus | **15** |
+| Research Datasets | **5** |
+| Research Reports | **10+** |
+| Generated Research Artifacts | **102+** |
+| Pipeline Stages | **7** |
+
+---
+
+# Evidence Highlights
+
+Current experiments provide the following evidence.
+
+### Compiler-Inspired Semantic Reuse
+
+- Eliminated **63.2%** of redundant semantic pipeline computations compared with an experimental recomputation baseline.
+- Reduced repeated execution of parser, AST, symbol, semantic, and design analysis stages through reusable semantic representations.
+
+---
+
+### Parser Validation
+
+- Successfully parsed **100%** of evaluated benchmark designs.
+- Zero parser failures across the current benchmark corpus.
+
+---
+
+### Semantic Analysis
+
+- Extracted deterministic semantic representations for all evaluated designs.
+- Generated structural metrics including modules, ports, signals, registers, hierarchy, and symbol information.
+
+---
+
+### Property Inference
+
+- Automatically generated more than **100 candidate formal properties** across the evaluated benchmark corpus.
+- Produced reproducible property datasets suitable for further analysis.
+
+---
+
+### Automated Research Pipeline
+
+Every experiment automatically generates:
+
+- CSV datasets
+- JSON datasets
+- Markdown reports
+- Statistical summaries
+- Publication tables
+- Publication figures
+- Experiment metadata
+
+No manual data collection is required.
+
+---
+
+# Research Artifacts
+
+Every evaluation produces reproducible research outputs.
+
+```text
+research_output/
+
+├── analysis/
+├── datasets/
+├── duplicate_computation/
+├── experiments/
+├── figures/
+├── large_scale_validation/
+├── reports/
+├── semantic_reuse/
+├── statistics/
+└── tables/
+```
+
+These artifacts are intended to support transparent experimentation, reproducibility, and future research publications.
+
+---
+
+# Research Findings
+
+Current evaluation has produced several evidence-backed observations.
+
+- Semantic reuse substantially reduces redundant semantic computation.
+- Parser robustness remained consistent across the evaluated benchmark corpus.
+- Property generation scales with increasing structural complexity.
+- Verification execution dominates total pipeline runtime, motivating future optimization and verification-focused studies.
+- Structural complexity metrics correlate positively with several stages of the engineering pipeline.
+
+These findings represent the current state of evaluation and will continue to evolve as the benchmark corpus expands.
+
+---
+
+# Reproducibility
+
+ChipLens emphasizes reproducible experimentation.
+
+Every experiment records:
+
+- Benchmark configuration
+- Execution metadata
+- Statistical summaries
+- Generated datasets
+- Experiment reports
+- Research findings
+
+Identical inputs produce identical research artifacts, enabling repeatable evaluation and independent verification of experimental results.
+
+---
+
+# Engineering Workbench
+
+ChipLens provides a desktop-first engineering environment for exploring, analyzing, and verifying RTL designs.
+
+The workbench serves as the front-end for the semantic analysis pipeline and experimental framework, allowing engineering workflows and research experiments to operate within a unified environment.
+
+## Current Components
+
+| Component | Purpose |
+|-----------|---------|
+| Workspace Explorer | Project navigation |
+| RTL Editor | SystemVerilog editing |
+| Outline View | Structural overview |
+| Symbol Explorer | Semantic navigation |
+| Problems Panel | Diagnostics |
+| Output Console | Pipeline execution logs |
+| Command Palette | Quick actions |
+| Global Search | Workspace search |
+| Status Bar | Project status |
+| Research Console | Experiment execution |
+
+---
+
+# Repository Structure
+
+The repository is organized into independent engineering and research modules.
+
+```text
+ChipLens/
+
+├── frontend/                 Flutter desktop application
+├── backend/                  Analysis and experiment backend
+├── benchmarks/               RTL benchmark corpus
+├── docs/                     Documentation and evaluation protocols
+├── research_output/          Generated datasets and reports
+├── test/                     Automated test suite
+│
+├── android/
+├── ios/
+├── linux/
+├── macos/
+├── windows/
+└── web/
+```
+
+---
+
+# Research Output Structure
+
+All experimental results are generated automatically.
+
+```text
+research_output/
+
+analysis/
+datasets/
+duplicate_computation/
+experiments/
+figures/
+large_scale_validation/
+reports/
+semantic_reuse/
+statistics/
+tables/
+```
+
+Every directory is reproducible and generated directly from the experiment pipeline.
 
 ---
 
@@ -256,330 +610,45 @@ The framework is designed to support reproducible experimentation and future sta
 
 | Layer | Technology |
 |--------|------------|
-| Desktop Application | Flutter 3.x |
-| Core Platform | Dart |
+| Desktop Application | Flutter |
+| Language | Dart |
 | Backend Services | Node.js + Express |
-| RTL Parsing | Tree-sitter |
+| Parser | Tree-sitter |
 | Formal Verification | SymbiYosys |
 | Simulation | Icarus Verilog |
 | Linting | Verilator |
-| Logic Synthesis | Yosys |
-
----
-
-# Current Implementation
-
-| Component | Status |
-|------------|--------|
-| RTL Parsing | ✅ Complete |
-| AST Construction | ✅ Complete |
-| Symbol Table | ✅ Complete |
-| Semantic Analysis | ✅ Complete |
-| Dependency Analysis | ✅ Complete |
-| Property Inference | ✅ Complete |
-| Navigation Services | ✅ Complete |
-| Formal Verification Pipeline | ✅ Complete |
-| Evaluation Framework | ✅ Complete |
-| Benchmark Infrastructure | ✅ Complete |
-| Research Artifact Generation | ✅ Complete |
-
----
-
-# Research Platform
-
-ChipLens is being developed not only as an RTL engineering platform but also as a research artifact for investigating compiler-inspired verification methodologies.
-
-The long-term objective is to evaluate how semantic reasoning can support verification workflows through reproducible experimentation rather than anecdotal examples.
-
----
-
-# Research Objectives
-
-The current research focuses on four complementary directions.
-
-| Area | Objective |
-|-------|-----------|
-| Compiler-Inspired RTL Analysis | Investigate reusable semantic representations for RTL engineering |
-| Property Inference | Study semantic-driven generation of formal verification properties |
-| Verification Workflows | Integrate semantic analysis with formal verification engines |
-| Experimental Evaluation | Build reproducible methodologies for quantitative evaluation |
-
----
-
-# Experimental Infrastructure
-
-ChipLens includes an integrated evaluation framework designed to support repeatable experiments.
-
-Current infrastructure includes:
-
-- Benchmark management
-- Benchmark corpus
-- Automated evaluation
-- Experiment execution
-- Structured reporting
-- Research artifact generation
-
-The platform automatically exports machine-readable datasets for downstream statistical analysis.
-
-```
-research_output/
-
-csv/
-json/
-markdown/
-metadata/
-```
-
-Supported export formats include:
-
-- CSV
-- JSON
-- Markdown
-
-allowing experiments to be reproduced without manual post-processing.
-
----
-
-# Benchmark Infrastructure
-
-ChipLens currently maintains two complementary benchmark collections.
-
-### Engineering Benchmark Suite
-
-Used for regression testing and pipeline validation.
-
-Current coverage includes:
-
-- Flip-Flops
-- Counters
-- FSMs
-- Hierarchical designs
-- ALUs
-- Shift Registers
-- Handshake protocols
-
-These benchmarks validate the correctness of the engineering pipeline.
-
----
-
-### Research Benchmark Corpus
-
-The research corpus organizes larger open-source RTL designs for future experimental evaluation.
-
-Current benchmark categories include:
-
-- Educational Designs
-- Communication
-- Memory
-- Processors
-- Bus Architectures
-- Control Logic
-- Miscellaneous Designs
-
-The benchmark corpus is intended to support scalability studies, comparative evaluation and reproducible experiments.
-
----
-
-# Evaluation Methodology
-
-ChipLens measures multiple aspects of the verification pipeline rather than relying on a single performance metric.
-
-Current evaluation includes:
-
-| Category | Examples |
-|----------|----------|
-| Timing | Parsing, semantic analysis, verification |
-| Structural | Modules, ports, signals, instances |
-| Semantic | FSMs, clock domains, reset domains |
-| Verification | Generated properties, diagnostics, verification outcomes |
-
-These measurements are exported automatically after every evaluation run.
-
----
-
-# Reproducible Research
-
-A primary design goal of ChipLens is reproducibility.
-
-Every experiment is intended to generate structured outputs that can be archived, regenerated and incorporated into future research publications.
-
-Typical outputs include:
-
-```
-research_output/
-
-csv/
-performance.csv
-semantic.csv
-verification.csv
-
-json/
-performance.json
-semantic.json
-verification.json
-
-markdown/
-summary.md
-benchmark_report.md
-
-metadata/
-experiment.json
-```
-
-This structure enables downstream statistical analysis and automated figure generation without requiring manual data collection.
-
----
-
-# Current Research Status
-
-The engineering platform has reached the point where systematic experimental evaluation becomes the primary development focus.
-
-Current priorities include:
-
-- Expanding the benchmark corpus
-- Large-scale experimental evaluation
-- Statistical analysis
-- Comparative studies
-- Scalability analysis
-- Preparation of research publications
-
-Future work will focus on validating the proposed architecture through quantitative evidence rather than adding isolated software features.
-
----
-
-# Engineering Workbench
-
-ChipLens provides a desktop-first RTL engineering environment inspired by modern software IDEs.
-
-The workbench is designed around immutable MVVM architecture and integrates engineering tools into a single workspace.
-
-## Major Components
-
-| Component | Purpose |
-|------------|---------|
-| Activity Bar | Primary workspace navigation |
-| Project Explorer | RTL project and file management |
-| RTL Editor | Syntax-aware editing environment |
-| Outline View | Structural overview of the current design |
-| Symbol Explorer | Semantic navigation |
-| Problems Panel | Diagnostics and verification issues |
-| Output Panel | Analysis and verification logs |
-| Command Palette | Command-driven workflow |
-| Global Search | Workspace-wide search |
-| Status Bar | Project and verification status |
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|-----------|--------|
-| `Ctrl + P` | Quick Open |
-| `Ctrl + Shift + P` | Command Palette |
-| `Ctrl + Shift + F` | Global Search |
-| `Ctrl + Shift + O` | Go To Symbol |
-| `F12` | Go To Definition |
-| `Shift + F12` | Find References |
-| `Ctrl + W` | Close Editor |
-| `Ctrl + B` | Toggle Explorer |
-
----
-
-# Current Project Status
-
-| Metric | Value |
-|--------|------:|
-| Passing Tests | **6,404** |
-| Test Files | **173** |
-| Analyzer Errors | **0** |
-| Parser | ✅ |
-| AST | ✅ |
-| Semantic Analysis | ✅ |
-| Verification Pipeline | ✅ |
-| Benchmark Infrastructure | ✅ |
-| Research Platform | ✅ |
-
----
-
-# Repository Structure
-
-```
-ChipLens/
-│
-├── backend/            Node.js REST services
-│
-├── frontend/
-│   ├── lib/
-│   │   ├── backend/    Compiler-inspired RTL pipeline
-│   │   ├── services/   Verification & engineering services
-│   │   └── ui/         Desktop workbench
-│   │
-│   └── test/           Automated test suite
-│
-├── benchmarks/         Benchmark corpus
-│
-├── docs/               Documentation
-│
-└── research_output/    Generated experiment artifacts
-```
-
----
-
-# Documentation
-
-Additional documentation is available in the `docs/` directory.
-
-| Document | Description |
-|-----------|-------------|
-| Architecture | System architecture and design |
-| Benchmarks | Benchmark infrastructure |
-| Evaluation | Experimental methodology |
-| Verification | Verification pipeline |
-| Research | Research planning and artifacts |
+| Synthesis | Yosys |
 
 ---
 
 # Getting Started
 
-## Requirements
-
-| Dependency | Version |
-|------------|---------|
-| Flutter | 3.x |
-| Dart | 3.x |
-| Node.js | 20+ |
-| Yosys | Latest |
-| Verilator | Latest |
-| Icarus Verilog | Latest |
-| SymbiYosys | Latest |
-
----
-
-## Backend
+## Clone
 
 ```bash
-cd backend
-
-npm install
-
-node index.js
+git clone https://github.com/Anumeha600/ChipLens.git
+cd ChipLens
 ```
 
 ---
 
-## Frontend
+## Install Dependencies
 
 ```bash
-cd frontend
-
 flutter pub get
+```
 
+---
+
+## Launch Desktop Application
+
+```bash
 flutter run
 ```
 
 ---
 
-## Run Tests
+## Execute Tests
 
 ```bash
 flutter test
@@ -595,96 +664,140 @@ flutter analyze
 
 ---
 
-## Generate Research Artifacts
+## Run Research Pipeline
 
 ```dart
-final report =
-    await EvaluationRunner().runSuite(
-        EvaluationSuite.defaults(),
-    );
-
-await EvaluationExporter.exportResearchArtifacts(
-    report,
-    "research_output",
+await ResearchDatasetExporter.runAndExport(
+  outputDir: "research_output",
 );
 ```
 
-Running the evaluation framework automatically produces structured CSV, JSON and Markdown artifacts that can be used for experimental analysis.
+This command automatically generates:
 
-# Roadmap
-
-ChipLens is being developed as both an engineering platform and a research platform.
-
-The engineering foundation is largely established. Current development is focused on experimental evaluation, evidence generation and research publication.
-
-| Milestone | Status |
-|------------|--------|
-| RTL Front-End | ✅ Complete |
-| Semantic Analysis | ✅ Complete |
-| Symbol Resolution | ✅ Complete |
-| Dependency Analysis | ✅ Complete |
-| Property Inference | ✅ Complete |
-| Navigation Services | ✅ Complete |
-| Verification Pipeline | ✅ Complete |
-| Evaluation Framework | ✅ Complete |
-| Benchmark Infrastructure | ✅ Complete |
-| Research Artifact Generation | ✅ Complete |
-| Experimental Evaluation | 🚧 In Progress |
-| Statistical Analysis | 🚧 Planned |
-| Comparative Evaluation | 🚧 Planned |
-| Scalability Studies | 🚧 Planned |
-| Research Publication | 🚧 In Preparation |
+- Experimental datasets
+- Statistical summaries
+- Publication tables
+- Publication figures
+- Markdown reports
 
 ---
 
-# Research Vision
+# Development Philosophy
 
-ChipLens is intended to evolve beyond a traditional RTL development environment into a reproducible research platform for compiler-inspired hardware engineering.
+ChipLens follows several engineering principles.
 
-Current research efforts focus on:
+- Deterministic execution
+- Immutable semantic representations
+- Test-driven development
+- Modular architecture
+- Reproducible experimentation
+- Evidence-driven evaluation
 
-- Semantic representations for RTL engineering
-- Compiler-inspired verification architectures
-- Semantic-driven property inference
-- Explainable verification workflows
-- Reproducible experimental methodologies
+---
 
-Future work will emphasize quantitative evaluation using benchmark-driven experimentation, statistical analysis and comparative studies.
+# Quality Assurance
 
-The long-term objective is to produce a reusable research platform capable of supporting academic publications as well as practical RTL engineering workflows.
+Current project quality metrics.
+
+| Metric | Status |
+|---------|--------|
+| Automated Tests | ✅ 7,801+ Passing |
+| Test Failures | ✅ 0 |
+| Analyzer Errors | ✅ 0 |
+| Continuous Integration | ✅ Enabled |
+| Deterministic Pipeline | ✅ Verified |
+| Reproducible Outputs | ✅ Verified |
+
+---
+
+# Documentation
+
+Comprehensive documentation is available throughout the repository.
+
+| Documentation | Description |
+|---------------|-------------|
+| Architecture | Compiler-inspired pipeline |
+| Evaluation | Experimental methodology |
+| Benchmarks | RTL corpus documentation |
+| Research | Generated findings and reports |
+| Experiments | Experiment framework |
+| Productivity Study | Human evaluation protocol |
+
+---
+
+# Research Roadmap
+
+ChipLens is being developed as a long-term research platform rather than a single software release.
+
+The roadmap is organized around research milestones instead of feature additions.
+
+| Phase | Status |
+|--------|--------|
+| Phase I — Compiler-Inspired Engineering Platform | ✅ Complete |
+| Phase II — Semantic Analysis Infrastructure | ✅ Complete |
+| Phase III — Automated Research Platform | ✅ Complete |
+| Phase IV — Experimental Validation | 🚧 In Progress |
+| Phase V — Human Productivity Evaluation | 📋 Planned |
+| Phase VI — Research Publications | 📋 Planned |
+
+---
+
+# Current Research Focus
+
+Current development priorities include:
+
+- Expanding the benchmark corpus using larger open-source RTL projects.
+- Evaluating the quality and usefulness of automatically generated formal properties.
+- Measuring verification effectiveness using controlled fault-injection benchmarks.
+- Conducting controlled engineering productivity studies with human participants.
+- Strengthening statistical analysis for future journal and conference publications.
+
+---
+
+# Planned Publications
+
+ChipLens is intended to support multiple complementary research publications.
+
+| Planned Paper | Current Status |
+|---------------|----------------|
+| Compiler-Inspired Semantic RTL Architecture | Evidence Collection Complete |
+| Automated Property Inference for RTL Verification | Evaluation Ongoing |
+| Semantic Diagnostics for RTL Verification | Planned |
+| Engineering Productivity in RTL Workflows | Evaluation Framework Complete |
+
+Publication plans may evolve as additional experimental evidence is collected.
 
 ---
 
 # Contributing
 
-Contributions are welcome.
+Contributions that strengthen the engineering platform or the research methodology are welcome.
 
-Areas of particular interest include:
+Examples include:
 
-- RTL parsing
-- Semantic analysis
-- Formal verification
-- Property inference
-- Benchmark development
+- RTL benchmark designs
+- Parser improvements
+- Semantic analysis enhancements
+- Property inference techniques
 - Experimental evaluation
-- Documentation
-- Testing
+- Documentation improvements
+- Bug reports and reproducibility improvements
 
-If you are interested in collaborating on compiler-inspired RTL engineering research, please open an issue or submit a pull request.
+Please ensure that new contributions preserve deterministic behavior, maintain reproducibility, and include appropriate automated tests.
 
 ---
 
 # Citation
 
-If ChipLens contributes to your research, please consider citing it.
+If ChipLens contributes to your research, teaching, or engineering work, please cite it as:
 
 ```bibtex
-@software{paul2026chiplens,
-  author = {Anumeha Paul},
-  title = {ChipLens Lite: Compiler-Inspired Semantic RTL Engineering and Verification Platform},
-  year = {2026},
-  url = {https://github.com/Anumeha600/ChipLens},
-  note = {Research platform for semantic RTL engineering, verification and reproducible evaluation}
+@software{chiplens2026,
+  title   = {ChipLens},
+  author  = {Paul, Anumeha},
+  year    = {2026},
+  note    = {Compiler-Inspired Semantic RTL Engineering and Verification Research Platform},
+  url     = {https://github.com/Anumeha600/ChipLens}
 }
 ```
 
@@ -692,18 +805,49 @@ If ChipLens contributes to your research, please consider citing it.
 
 # License
 
-This project is released under the **MIT License**.
+ChipLens is released under the **MIT License**.
 
 See the `LICENSE` file for additional details.
 
 ---
 
+# Acknowledgements
+
+ChipLens builds upon numerous open-source technologies and the broader hardware engineering community.
+
+The project makes use of tools including:
+
+- Flutter
+- Dart
+- Tree-sitter
+- Yosys
+- SymbiYosys
+- Icarus Verilog
+- Verilator
+
+Their continued development has made this research platform possible.
+
+---
+
+# Project Philosophy
+
+ChipLens was created with a simple idea:
+
+> **Engineering decisions should be supported by reusable semantic information, and research claims should be supported by reproducible experimental evidence.**
+
+The project combines compiler design principles, RTL engineering, formal verification, and empirical software engineering into a unified research platform.
+
+As the benchmark corpus expands and additional experimental evidence is collected, ChipLens aims to contribute reproducible methodologies and open research artifacts that support future advances in RTL engineering and verification.
+
+---
+
 <p align="center">
 
-**ChipLens Lite**
+**ChipLens**
 
-*Compiler-Inspired Semantic RTL Engineering and Verification Platform*
+*Compiler-Inspired Semantic RTL Engineering and Verification Research Platform*
 
-**Built for Engineering. Designed for Research.**
+**Build • Understand • Analyze • Verify • Evaluate • Research**
 
 </p>
+
